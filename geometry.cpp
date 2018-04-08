@@ -48,8 +48,56 @@ bool isInLine(const std::pair<int, int>& p1, const std::pair<int, int>& p2, cons
     return d1x * d2y == d1y * d2x;
 }
 
+double dist(pair<int,int> a, pair<int,int> b){
+    int d1 = a.e1-b.e1, d2 = a.e2-b.e2;
+    return sqrt(d1*d1+d2*d2);
+}
+
+pair<int,int> vec(pair<int,int> a, pair<int,int> b){
+    return mp(a.e1-b.e1,a.e2-b.e2);
+}
+
+int dotproduct(pair<int,int> a, pair<int,int> b){ //vectory
+    return a.e1*b.e1+a.e2*b.e2; //to samo co |A|*|B|*cos(kat a,b)
+    //wiec cos(a,b) to jest
+    //dotproduct(a,b)/(|A|*|B|)
+    //z tego, (najkrotszy, czyli (0,180 [stopni]) kat miedzy vectorami to
+    //acos(cos(a,b))
+}
+
+int crossproduct(pair<int,int> a, pair<int,int> b){ //vectory
+    return a.e1*b.e2 - a.e2*b.e1;
+    //|A|*|B|*sin(a,b)
+    //pole trójkąta ABC to crossproduct(AB,BC)/2.0
+}
+
+double disttoline(pair<int,int> p, pair<int,int> a, pair<int,int> b){ //dystans punktu p do lini AB
+    int cross = crossproduct(vec(a,b),vec(a,p));
+    return abs(cross/dist(a,b));
+}
+
+double disttosegment(pair<int,int> p, pair<int,int> a, pair<int,int> b){ //dystans punktu p do odcinka AB
+    int dst = crossproduct(vec(a,b),vec(p,a))/dist(a,b);
+    int dot1 = dotproduct(vec(b,a),vec(p,b));
+    whatis(dot1)
+    if(dot1 > 0) return dist(b,p);
+    int dot2 = dotproduct(vec(a,b),vec(p,a));
+    whatis(dot2)
+    if(dot2 > 0) return dist(a,p);
+    return abs(dst);
+}
+
+double polygonarea(vector<pair<int,int>> &v){ //sum of ares of triangles from first vertex, with every 2 adjacent vertexes. Works for non and yes convex, because areas are signed.
+    int n = v.size();
+    double res = 0;
+    for(int i = 1; i+1 < n; ++i){
+        res += crossproduct(vec(v[0],v[i]),vec(v[0],v[i+1]));
+    }
+    return abs(res/2.0);
+}
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
+    cout << disttosegment({3,8},{4,0},{8,0});
 }
 
