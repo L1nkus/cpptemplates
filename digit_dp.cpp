@@ -48,6 +48,10 @@ ll qu(string n){
     memset(dp,0,sizeof dp);
     dp[0][0][0] = 1;
     int len = n.size();
+    //Gdyz tutaj liczby o mniejszej ilosci cyfr tak naprawde skladaja sie z
+    //leading zeros przed nimi, jesli one wplywaja na statey, trzeba dolozyc
+    //dodatkowy case - czy byla juz jakas zaczeta liczba, oraz dodatkowo
+    //rozwazyc '0'
     for(int i = 0; i < len; ++i){
         for(int t = 0; t < 2; ++t){ //t == 1 -> brak limitu
             for(int s = 0; s < 155; ++s){
@@ -74,7 +78,22 @@ int main(){
     string a,b;
     while(t--){
         cin >> a >> b;
-        cout << qu(b)-(a.size() == 1 && a[0] <= '1'?0:qu(to_string(stoll(a)-1))) << '\n';
+        ll res = qu(b);
+        if(a.size() > 1 || a[0] != '0'){
+            auto it = a.end()-1;
+            while(it != a.begin() && *it == '0'){
+                *it = '9';
+                --it;
+            }
+            if(it == a.begin() && *it == '1'){
+                a.erase(a.begin());
+            }
+            else{
+                --*it;
+            }
+            res -= qu(a);
+        }
+        cout << res << '\n';
     }
 }
 
