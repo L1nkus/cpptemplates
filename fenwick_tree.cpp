@@ -38,19 +38,21 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-//Range Sum Query, Single element incrementaion update (only possibility pretty much)
+//Range Sum Query, Single element incrementaion update (only possibility pretty much, unless no re-modifications)
 int n;
 #define N 100000 //The same as array size is the need
 int t[N];
 
+//1 INDEXED
+
 inline void upd(int pos, int val){ //val is delta
-    for(;pos < n;pos |= (pos+1))
+    for(;pos <= n;pos += pos & (-pos))
         t[pos] += val;
 }
 
 inline int query(int r){ //[0,r]
     int ret = 0;
-    for(;r >= 0;r = (r & (r+1))-1)
+    for(;r > 0;r -= r & (-r))
         ret += t[r];
     return ret;
 }
@@ -59,16 +61,16 @@ int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int a[] = {1,9,-4,0,32,1,8};
     n = sizeof a >> 2;
-    for(int i = 0; i < n; ++i){
-        cout << a[i] << ' ';
-        upd(i,a[i]);
+    for(int i = 1; i <= n; ++i){
+        cout << a[i-1] << ' ';
+        upd(i,a[i-1]);
     }
     cout << endl;
     int q,f,s;
     cin >> q;
     while(q--){
         cin >> f >> s;
-        cout << query(s) - (f?query(f-1):0) << endl;
+        cout << query(s+1) - (f?query(f):0) << endl;
     }
 }
 

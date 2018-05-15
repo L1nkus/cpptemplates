@@ -87,7 +87,7 @@ double disttosegment(pair<int,int> p, pair<int,int> a, pair<int,int> b){ //dysta
     return abs(dst);
 }
 
-double polygonarea(vector<pair<int,int>> &v){ //sum of ares of triangles from first vertex, with every 2 adjacent vertexes. Works for non and yes convex, because areas are signed.
+double polygonarea(vector<pair<int,int>> &v){ //sum of areas of triangles from first vertex, with every 2 adjacent vertexes. Works for non and yes convex, because areas are signed.
     int n = v.size();
     double res = 0;
     for(int i = 1; i+1 < n; ++i){

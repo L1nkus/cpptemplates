@@ -30,7 +30,7 @@ template<typename T> inline T fstoi(const string &str){auto it=str.begin();bool 
 template<typename T> inline void sc(T &num){bool neg=0;int c;num=0;while(c=getchar_unlocked(),c<33){;}if(c=='-'){neg=1;c=getchar_unlocked();} for(;c>47;c=getchar_unlocked()) num=num*10+c-48;if(neg) num*=-1;}
 inline void getstr(string &str){char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 
-const int N = 1e5+2;
+const int N = 1e5+2; //Sometimes must be scaled into a power of 2!!!!!!!!!!!!!
 int t[N*2];
 int n;
 

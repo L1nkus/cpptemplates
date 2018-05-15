@@ -38,30 +38,77 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-int main(){
-    //Strictly Increasing Subsequence, prints last in input
-    ios_base::sync_with_stdio(0);cin.tie(0);
-    static int in[1000000], dit[1000000];
-    vector<int> vec(1000000);
-    int n = -1, ans = 1;
-    vec[0] = 0x7f7f7f7f;
-    while(sc(in[++n])){
-        auto it = lower_bound(vec.begin(),vec.begin()+ans,in[n]);
-        *it = in[n];
-        ans = max(ans,int(it-vec.begin()+1));
-        dit[n] = it-vec.begin()+1;
-        FOR(i,0,7)
-            cout << vec[i] << ' ';
-        cout << '\n';
+#define N 100001
+vector<int> dz[N];
+
+struct node{
+    int mn = 0x7f7f7f7f;
+    node *nxt[2];
+    /* node(){ */
+    /*     nxt[0] = nxt[1] = nullptr; */
+    /* } */
+};
+
+node tr[N];
+bool was[N];
+
+inline void add(int n, int c){
+    node *x = &tr[n];
+    x->mn = min(x->mn, c);
+    for(int i = 18; i > 0; --i){
+        bool wh = c & (1 << (i-1));
+        if(x->nxt[wh] == nullptr){
+            x->nxt[wh] = new node();
+        }
+        x = x->nxt[wh];
+        x->mn = min(x->mn, c);
     }
-    cout << ans << "\n-\n";
-    int out[ans];
-    for(int i = n; ~i; --i){
-        if(dit[i] == ans){
-            out[--ans] = in[i];
+}
+
+inline int qu(int n, int w, int s){
+    int ret = 0;
+    node *x = &tr[n];
+    if(x->nxt[0] == nullptr && x->nxt[1] == nullptr) return -1;
+    if(x->mn > s) return -1;
+    for(int i = 18; i > 0; --i){
+        bool wh = (w & (1 << (i-1)));
+        wh ^= 1;
+        if(x->nxt[wh] && x->nxt[wh]->mn <= s){
+            ;
+        }
+        else{
+            wh ^= 1;
+        }
+        ret += wh << (i-1);
+        x = x->nxt[wh];
+    }
+    return ret;
+}
+
+int main(){
+    ios_base::sync_with_stdio(0);cin.tie(0);
+    for(int i = 1; i < N; ++i){
+        for(int x = i; x < N; x += i){
+            dz[x].push_back(i);
         }
     }
-    FORR(i,out)
-        cout << i << '\n';
+    int q,t,x,k,s;
+    sc(q);
+    while(q--){
+        sc(t);
+        if(t == 1){
+            sc(x);
+            if(was[x]) continue;
+            was[x] = 1;
+            FORR(i,dz[x]){
+                add(i,x);
+            }
+        }
+        else{
+            sc(x,k,s);
+            if(x%k){cout << "-1\n"; continue;}
+            cout << qu(k,x,s-x) << '\n';
+        }
+    }
 }
 
