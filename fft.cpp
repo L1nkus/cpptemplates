@@ -115,8 +115,8 @@ vector<int> multiply(vector<int> a, vector<int> b, int n){
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    vector<int> a = {1,0,3};
-    vector<int> b = {4,2,5,2};
+    vector<int> a = {3,1,0};
+    vector<int> b = {0,1,0,0};
     int k = 1;
     while((1 << k) < (int)(a.size()+b.size()-1)) ++k;
     int nn = 1 << k;

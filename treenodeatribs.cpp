@@ -29,6 +29,8 @@ using namespace __gnu_pbds;
 #define getchar_unlocked() _getchar_nolock()
 #define _CRT_DISABLE_PERFCRIT_LOCKS
 #endif
+template<class L, class R> ostream& operator<<(ostream &os, map<L, R> P) { for(auto const &vv: P)os<<"("<<vv.first<<","<<vv.second<<")"; return os; }
+template<class T> ostream& operator<<(ostream &os, set<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class T> ostream& operator<<(ostream &os, vector<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class L, class R> ostream& operator<<(ostream &os, pair<L, R> P) { os<<"("<<P.first<<","<<P.second<<")"; return os; }
 inline int fstoi(const string &str){auto it=str.begin();bool neg=0;int num=0;if(*it=='-')neg=1;else num=*it-'0';++it;while(it<str.end()) num=num*10+(*it++-'0');if(neg)num*=-1;return num;}
@@ -37,67 +39,71 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-//various geometric functions
+#define N 1000001 //SIZE SIZE SIZE SIZE
 
-//Czy sa w jednej fukcji liniowej, bez floatow, bez dzielenia, bez edge casow!
-bool isInLine(const std::pair<int, int>& p1, const std::pair<int, int>& p2, const std::pair<int, int>& p3) {
-    int64_t d1x = p2.first - p1.first;
-    int64_t d1y = p2.second - p1.second;
-    int64_t d2x = p3.first - p1.first;
-    int64_t d2y = p3.second - p1.second;
-    return d1x * d2y == d1y * d2x;
-}
+int n;
+ll len[N]; //sum of distances to every other node
+pair<int,int> far[N]; //farthest node from node - {dist,targetnode}
+vector<int> adj[N];
+ll subl[N]; //sum of distances to every node in subtree
+int subcnt[N]; //size of subtree
+pair<int,int> subfar[N]; //farthest node in subtree
 
-double dist(pair<int,int> a, pair<int,int> b){
-    int d1 = a.e1-b.e1, d2 = a.e2-b.e2;
-    return sqrt(d1*d1+d2*d2);
-}
-
-pair<int,int> vec(pair<int,int> a, pair<int,int> b){
-    return mp(a.e1-b.e1,a.e2-b.e2);
-}
-
-int dotproduct(pair<int,int> a, pair<int,int> b){ //vectory
-    return a.e1*b.e1+a.e2*b.e2; //to samo co |A|*|B|*cos(kat a,b)
-    //wiec cos(a,b) to jest
-    //dotproduct(a,b)/(|A|*|B|)
-    //z tego, (najkrotszy, czyli (0,180 [stopni]) kat miedzy vectorami to
-    //acos(cos(a,b))
-}
-
-int crossproduct(pair<int,int> a, pair<int,int> b){ //vectory
-    return a.e1*b.e2 - a.e2*b.e1;
-    //|A|*|B|*sin(a,b)
-    //pole trójkąta ABC to crossproduct(AB,BC)/2.0
-}
-
-double disttoline(pair<int,int> p, pair<int,int> a, pair<int,int> b){ //dystans punktu p do lini AB
-    int cross = crossproduct(vec(a,b),vec(a,p));
-    return abs(cross/dist(a,b));
-}
-
-double disttosegment(pair<int,int> p, pair<int,int> a, pair<int,int> b){ //dystans punktu p do odcinka AB
-    int dst = crossproduct(vec(a,b),vec(p,a))/dist(a,b);
-    int dot1 = dotproduct(vec(b,a),vec(p,b));
-    if(dot1 > 0) return dist(b,p);
-    int dot2 = dotproduct(vec(a,b),vec(p,a));
-    if(dot2 > 0) return dist(a,p);
-    return abs(dst);
-}
-
-double polygonarea(vector<pair<int,int>> &v){ //sum of areas of triangles from first vertex, with every 2 adjacent vertexes. Works for non and yes convex, because areas are signed.
-    int n = v.size();
-    double res = 0;
-    for(int i = 1; i+1 < n; ++i){
-        res += crossproduct(vec(v[0],v[i]),vec(v[0],v[i+1]));
+void d1(int v, int p){
+    subcnt[v] = 1;
+    subfar[v].e2 = v;
+    FORR(i,adj[v]){
+        if(i == p) continue;
+        d1(i,v);
+        subl[v] += subl[i];
+        subcnt[v] += subcnt[i];
+        if(subfar[i].e1+1 > subfar[v].e1){
+            subfar[v] = {subfar[i].e1+1,subfar[i].e2};
+        }
     }
-    return abs(res/2.0);
+    subl[v] += subcnt[v]-1;
 }
 
-
+void d2(int v, int p, ll bckl, int bckc, pair<int,int> bckf){
+    len[v] = bckl+subl[v];
+    if(bckf.e1 == 0) bckf.e2 = v;
+    if(bckf.e1 > subfar[v].e1){
+        far[v] = bckf;
+    }
+    else{
+        far[v] = subfar[v];
+    }
+    set<pair<int,int>> mp;
+    mp.insert({bckf.e1+1,bckf.e2});
+    FORR(i,adj[v]){
+        if(i == p) continue;
+        mp.insert({subfar[i].e1+2,subfar[i].e2});
+    }
+    FORR(i,adj[v]){
+        if(i == p) continue;
+        pair<int,int> nxbckf;
+        if(mp.rbegin()->e2 == subfar[i].e2){
+            nxbckf = *next(mp.rbegin());
+        }
+        else{
+            nxbckf = *mp.rbegin();
+        }
+        int newbck = bckc+subcnt[v]-subcnt[i];
+        d2(i,v,bckl+newbck+subl[v]-subcnt[i]-subl[i],newbck,nxbckf);
+    }
+}
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    cout << disttosegment({3,8},{4,0},{8,0});
+    sc(n);
+    int f,s;
+    FOR(i,1,n){
+        sc(f,s);
+        --f,--s; //THIS ASSUMES 1-INDEXED NODE INPUT, CHANGE IF IT'S NOT
+        adj[f].pb(s);
+        adj[s].pb(f);
+    }
+    d1(0,-1);
+    d2(0,-1,0,0,{0,0});
 }
 
