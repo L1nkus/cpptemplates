@@ -4,48 +4,60 @@ using namespace std;
 //However, this implementation relies on value indexation, and as such
 //if values can be too large, compression is needed.
 
+//Supports printing out the sequence itself with some complications
+
 #define N 1000001
 int n = N-1;
 int t[N];
+int w[N];
+int p[N];
 
-void upd(int pos, int v){
+void upd(int pos, int v, int ind){
     for(;pos <= n; pos += pos & -pos){
         if(v > t[pos]){
             t[pos] = v;
+            w[pos] = ind;
         }
     }
 }
 
-int qu(int pos){
+int qu(int pos, int ind){
     int ret = 0;
+    p[ind] = -1;
     for(;pos > 0; pos -= pos & -pos){
         if(t[pos] > ret){
             ret = t[pos];
+            p[ind] = w[pos];
         }
     }
     return ret;
 }
 
 int main() {
-    ios_base::sync_with_stdio(0); cin.tie(0);
 	int n;
 	cin >> n;
     int in[n];
-    for(auto &i: in) cin >> i;
-    vector<int> vec(in,in+n);
-    sort(vec.begin(),vec.end());
-    vec.erase(unique(vec.begin(),vec.end()),vec.end());
-    for(auto &i: in){
-        i = lower_bound(vec.begin(),vec.end(),i)-vec.begin()+1;
-    }
     int ans = 0;
+    int aen;
     for(int i = 0; i < n; ++i){
-        int nv = qu(in[i])+1; //there must be no zeroes (fenwick)
+        cin >> in[i];
+        int nv = qu(in[i]+1,i)+1; //+1, because there must be no zeroes (fenwick)
         if(nv > ans){
             ans = nv;
+            aen = i; //ending points, needed for sequence backtrace
         }
-        upd(in[i],nv);
+        upd(in[i]+1,nv,i);
     }
+    //Backtrace
+    vector<int> vec;
+    int i = aen;
+    do{
+        vec.push_back(i);
+        i = p[i];
+    }while(~i);
+    reverse(vec.begin(),vec.end());
     cout << ans << '\n';
+    for(auto &i: vec)
+        cout << in[i] << ' ';
 }
 

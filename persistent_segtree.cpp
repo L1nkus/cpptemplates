@@ -52,8 +52,6 @@ struct Vertex {
 #define N 200007
 Vertex *v[N];
 
-
-
 Vertex* build(int a[], int tl, int tr) {
     if (tl == tr)
         return new Vertex(1);

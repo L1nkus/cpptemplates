@@ -80,8 +80,6 @@ int main(){
     }
     int sz = s.size()-pat.size()+1;
     FOR(i,0,sz){
-        if(i == 3 || i == 16)
-            whatis((h[i+pat.size()-1]-(i?(h[i-1]*p[pat.size()])%B:0))%B)
         if((h[i+pat.size()-1]-(i?(h[i-1]*p[pat.size()])%B:0))%B == phash)
             cout << "Found at " << i << '\n';
     }
