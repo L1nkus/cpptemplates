@@ -40,46 +40,46 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
+//online lca by binary lifting
+
 vector<int> adj[1000];
-int anc[1000][10]; //log(n) values for each node (1 << i)
+int anc[1000][11]; //log(n) values for each node (1 << i)
+int d[1000];
 
 void pre(int cur, int prev){
-    if(prev == -1){ //root
-        for(auto &i: adj[cur]){
-            pre(i, cur);
-        }
-        return;
-    }
     anc[cur][0] = prev;
     for(int i = 1; i < 10; ++i){
-        if(anc[cur][i-1] == -1) break; //limit
-        anc[cur][i] = anc[anc[cur][i-1]][i-1];
+        anc[cur][i] = anc[anc[cur][i-1]][i-1]; //could break if equal to 0
     }
     for(auto &i: adj[cur]){
         if(i != prev)
-            pre(i, cur);
+            d[i] = d[cur]+1, pre(i, cur);
     }
 }
 
-int query(int node, int cnt){
-    /* int val = 0; */
-    /* while(cnt){ //could also just go through every bit */
-    /*     if(cnt&1){ */
-    /*         node = anc[node][val]; */
-    /*         if(node == -1) */
-    /*             break; */
-    /*     } */
-    /*     cnt >>= 1; */
-    /*     ++val; */
-    /* } */
-    for(int i = 0; i < 10; ++i){
-        if((1 << i) & cnt){
-            node = anc[node][i];
-            if(node == -1)
-                break;
+int ancestor(int node, int cnt){
+    int val = 0;
+    while(cnt){ //could also just go through every bit
+        if(cnt&1){
+            node = anc[node][val];
         }
+        cnt >>= 1;
+        ++val;
     }
     return node;
+}
+
+int lca(int f, int s){
+    if(d[f] > d[s]) swap(f,s);
+    s = ancestor(s,d[s]-d[f]);
+    if(f == s) return f;
+    for(int i = 0; i < 10; ++i){
+        if(anc[f][i] != anc[s][i]){
+            f = anc[f][i];
+            s = anc[s][i];
+        }
+    }
+    return anc[f][0];
 }
 
 int main(){
@@ -91,14 +91,13 @@ int main(){
         cin >> cur; //i(th) node's parent is cur
         adj[cur].push_back(i);
     }
-    memset(anc,-1,sizeof anc); //set all to -1 to indicate out of range queries
-    pre(0,-1);
+    pre(0,0);
     int q; //query count
     cin >> q;
-    int node, num;
+    int f,s;
     while(q--){
-        cin >> node >> num; //ancestor(node,num)
-        cout << query(node, num) << '\n';
+        cin >> f >> s;
+        cout << lca(f,s) << endl;
     }
 }
 
