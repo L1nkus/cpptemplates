@@ -44,7 +44,7 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 
 #define N 10000
 int t[N << 2];
-bool mark[N];
+bool mark[N << 2];
 
 void build(int v, int tl, int tr, int arr[]){
     if(tl == tr){
