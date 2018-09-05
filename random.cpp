@@ -41,73 +41,16 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-//offline fast;easy lca
-
-int link[N],size[N];
-vector<int> adj[N];
-vector<int> queries[N];
-bool vis[N];
-int anc[N];
-vector<pair<int,int>> lca[N];
-
-inline int find(int x){
-    while(x != link[x]) x = link[x];
-    return x;
-}
-
-inline int unite(int fa, int fb){
-    if(size[fa] < size[fb]) swap(fa,fb);
-    size[fa] += size[fb];
-    return link[fb] = fa;
-}
-
-void dfs(int v){
-    vis[v] = 1;
-    anc[v] = v;
-    FORR(i,adj[v]){
-        if(!vis[i]){
-            dfs(i);
-            int fi = find(i);
-            int fv = find(v);
-            assert(fi != fv);
-            anc[unite(fi,fv)] = v;;
-        }
-    }
-    FORR(i,queries[v]){
-        if(vis[i]){
-            int mn = min(i,v);
-            lca[mp(mn,i+v-mn)] = anc[find(i)];
-        }
-    }
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count()); //mt19937_64 for 64bit
+inline int rand(int l, int r){
+    return uniform_int_distribution<int>(l,r)(rng);
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int n;
-    cin >> n;
-    int cur;
-    for(int i = 0; i < n; ++i){
-        size[i] = 1;
-        link[i] = i;
-    }
-    for(int i = 1; i < n; ++i){
-        cin >> cur;
-        adj[cur].pb(i);
-    }
-    int q;
-    cin >> q;
-    int f,s;
-    vector<pair<int,int>> qu;
-    while(q--){
-        cin >> f >> s;
-        queries[f].pb(s);
-        queries[s].pb(f);
-        int mn = min(f,s);
-        qu.push_back({mn,f+s-mn});
-    }
-    dfs(0);
-    FORR(i,qu){
-        cout << lca[i] << '\n';
-    }
+    int random = uniform_int_distribution<int>(0,10000)(rng);
+    cout << random << endl;
+    random = rand(0,10000);
+    cout << random << endl;
 }
 
