@@ -52,5 +52,6 @@ int main(){
     cout << random << endl;
     random = rand(0,10000);
     cout << random << endl;
+
 }
 

@@ -39,7 +39,7 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 //Suma cyfr liczb od 0 do n
-ll dp[18][155][2]; //{index, suma, czy bez limitu} -> ilosc spelniajace warunki state-a
+ll dp[20][155][2]; //{index, suma, czy bez limitu} -> ilosc spelniajace warunki state-a
 
 ll qu(string n){
     for(auto &i: n){
@@ -75,25 +75,11 @@ int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int t;
     cin >> t;
-    string a,b;
+    ll a,b;
     while(t--){
         cin >> a >> b;
-        ll res = qu(b);
-        if(a.size() > 1 || a[0] != '0'){
-            auto it = a.end()-1;
-            while(it != a.begin() && *it == '0'){
-                *it = '9';
-                --it;
-            }
-            if(it == a.begin() && *it == '1'){
-                a.erase(a.begin());
-            }
-            else{
-                --*it;
-            }
-            res -= qu(a);
-        }
+        ll res = qu(to_string(b));
+        res -= qu(to_string(a-1));
         cout << res << '\n';
     }
 }
-
