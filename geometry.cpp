@@ -37,67 +37,117 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-//various geometric functions
+//various geometric functions (2D)
 
-//Czy sa w jednej fukcji liniowej, bez floatow, bez dzielenia, bez edge casow!
-bool isInLine(const std::pair<int, int>& p1, const std::pair<int, int>& p2, const std::pair<int, int>& p3) {
-    int64_t d1x = p2.first - p1.first;
-    int64_t d1y = p2.second - p1.second;
-    int64_t d2x = p3.first - p1.first;
-    int64_t d2y = p3.second - p1.second;
+typedef long long ftype;
+//typ (int, ll, double)?
+
+struct point{
+    ftype x,y;
+    point();
+    point(ftype x, ftype y): x(x), y(y){};
+    point& operator+=(const point &t){
+        x += t.x;
+        y += t.y;
+        return *this;
+    }
+    point& operator-=(const point &t){
+        x -= t.x;
+        y -= t.y;
+        return *this;
+    }
+    point& operator*=(ftype t){
+        x *= t;
+        y *= t;
+        return *this;
+    }
+    point& operator/=(ftype t){
+        x /= t;
+        y /= t;
+        return *this;
+    }
+    point operator+(const point &t) const {
+        return point(*this) += t;
+    }
+    point operator-(const point &t) const {
+        return point(*this) -= t;
+    }
+    point operator*(ftype t) const {
+        return point(*this) *= t;
+    }
+    point operator/(ftype t) const {
+        return point(*this) /= t;
+    }
+};
+point operator*(ftype a, point b) { return b*a; }
+ostream& operator<<(ostream &os, point v) { os<<"[";os<<v.x<<' '<<v.y<<"]"; return os; }
+istream& operator>>(istream &is, point v) { is >> v.x >> v.y; return is; }
+
+//Czy sa w jednej fukcji liniowej, bez floatow, bez dzielenia, bez edge casow
+bool isInLine(const point& p1, const point& p2, const point& p3) {
+    ftype d1x = p2.x - p1.x;
+    ftype d1y = p2.y - p1.y;
+    ftype d2x = p3.x - p1.x;
+    ftype d2y = p3.y - p1.y;
     return d1x * d2y == d1y * d2x;
 }
 
-double dist(pair<int,int> a, pair<int,int> b){
-    int d1 = a.e1-b.e1, d2 = a.e2-b.e2;
+double dist(point a, point b){
+    double d1 = a.x-b.x, d2 = a.y-b.y;
     return sqrt(d1*d1+d2*d2);
 }
 
-pair<int,int> vec(pair<int,int> a, pair<int,int> b){
-    return mp(a.e1-b.e1,a.e2-b.e2);
-}
-
-int dotproduct(pair<int,int> a, pair<int,int> b){ //vectory
-    return a.e1*b.e1+a.e2*b.e2; //to samo co |A|*|B|*cos(kat a,b)
+ftype dot(point a, point b){ //vectory
+    return a.x*b.x+a.y*b.y; //to samo co |A|*|B|*cos(kat a,b)
     //wiec cos(a,b) to jest
     //dotproduct(a,b)/(|A|*|B|)
     //z tego, (najkrotszy, czyli (0,180 [stopni]) kat miedzy vectorami to
     //acos(cos(a,b))
+    //0 -> prostopadłe
+    //>0 -> skierowane w tę samą stronę (<180 deg)
+    //<0 -> skierowane w przeciwną stronę
 }
 
-int crossproduct(pair<int,int> a, pair<int,int> b){ //vectory
-    return a.e1*b.e2 - a.e2*b.e1;
+ftype cross(point a, point b){ //vectory
+    return a.x*b.y - a.y*b.x;
     //|A|*|B|*sin(a,b)
     //pole trójkąta ABC to crossproduct(AB,BC)/2.0
+    //0 -> na tej samej prostej
+    //>0 -> na lewo od a (najkrócej ofc)
+    //<0 -> na prawo od b
 }
 
-double disttoline(pair<int,int> p, pair<int,int> a, pair<int,int> b){ //dystans punktu p do lini AB
-    int cross = crossproduct(vec(a,b),vec(a,p));
-    return abs(cross/dist(a,b));
+double disttoline(point p, point a, point b){ //dystans punktu p do lini AB
+    ftype crss = cross(b-a,p-a);
+    return abs(crss/dist(a,b));
 }
 
-double disttosegment(pair<int,int> p, pair<int,int> a, pair<int,int> b){ //dystans punktu p do odcinka AB
-    int dst = crossproduct(vec(a,b),vec(p,a))/dist(a,b);
-    int dot1 = dotproduct(vec(b,a),vec(p,b));
+double disttosegment(point p, point a, point b){ //dystans punktu p do odcinka AB
+    int dst = cross(b-a,a-p)/dist(a,b);
+    int dot1 = dot(a-b,b-p);
     if(dot1 > 0) return dist(b,p);
-    int dot2 = dotproduct(vec(a,b),vec(p,a));
+    int dot2 = dot(b-a,a-p);
     if(dot2 > 0) return dist(a,p);
     return abs(dst);
 }
 
-double polygonarea(vector<pair<int,int>> &v){ //sum of areas of triangles from first vertex, with every 2 adjacent vertexes. Works for non and yes convex, because areas are signed.
+double polygonarea(vector<point> &v){ //sum of areas of triangles from first vertex, with every 2 adjacent vertexes. Works for non and yes convex, because areas are signed.
     int n = v.size();
     double res = 0;
     for(int i = 1; i+1 < n; ++i){
-        res += crossproduct(vec(v[0],v[i]),vec(v[0],v[i+1]));
+        res += cross(v[i]-v[0],v[i+1]-v[0]);
     }
     return abs(res/2.0);
 }
 
-
+point intersect(point a1, point a2, point b1, point b2){ //intersection of 2 lines
+    ftype c1 = cross(a2-a1,b2);
+    ftype c2 = cross(b1,b2);
+    if(!c2) return {-INF,INF}; //parallel
+    return a1+c1/c2*b1;
+}
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    cout << disttosegment({3,8},{4,0},{8,0});
 }
 
