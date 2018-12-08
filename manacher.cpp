@@ -46,27 +46,29 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 //separators
 vector<int> pal_array(string s){
     int n = s.size();
-    s = "@" + s + "$";
+    s = "." + s + ".";
     vector<int> len(n + 1);
     int l = 1, r = 1;
-    for(int i = 1; i <= n; i++)
-    {
+    for(int i = 1; i <= n; i++){
         len[i] = min(r - i, len[l + (r - i)]);
-        while(s[i - len[i]] == s[i + len[i]])
-            len[i]++;
-        if(i + len[i] > r)
-        {
+        while(s[i - len[i]] == s[i + len[i]]) ++len[i];
+        if(i + len[i] > r){
             l = i - len[i];
             r = i + len[i];
         }
     }
     len.erase(begin(len));
+        //subpalindome count
+    /* int ret = 0; */
+    /* FOR(i,0,n){ */
+    /*     ret += len[i]/2; */
+    /* } */
     return len;
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    string s = "abababa";
+    string s = "aab";
     int n = s.size();
 	string ss = s;
     s.resize(n*2-1);
