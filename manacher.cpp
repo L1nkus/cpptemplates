@@ -42,27 +42,35 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 #define N 1000001
 
 //can also solve with hashes in nlogn
-//half-length of maximum odd palindrome with center in i, to get even, add
-//separators
-vector<int> pal_array(string s){
+
+//half-length of maximum odd palindrome with center in i, to get even,
+//separators are added
+vector<int> pal_array(string ss){
+    string s = ".";
+    FOR(i,0,ss.size()){
+        s += ss[i];
+        s += '.';
+    }
     int n = s.size();
-    s = "." + s + ".";
-    vector<int> len(n + 1);
-    int l = 1, r = 1;
-    for(int i = 1; i <= n; i++){
-        len[i] = min(r - i, len[l + (r - i)]);
-        while(s[i - len[i]] == s[i + len[i]]) ++len[i];
-        if(i + len[i] > r){
-            l = i - len[i];
-            r = i + len[i];
+    whatis(s)
+    vector<int> len(n);
+    for (int i = 0, l = 0, r = -1; i < n; i++) {
+        int k = (i > r) ? 1 : min(len[l + r - i], r - i);
+        while (0 <= i - k && i + k < n && s[i - k] == s[i + k]) {
+            k++;
+        }
+        len[i] = k--;
+        if (i + k > r) {
+            l = i - k;
+            r = i + k;
         }
     }
-    len.erase(begin(len));
         //subpalindome count
-    /* int ret = 0; */
-    /* FOR(i,0,n){ */
-    /*     ret += len[i]/2; */
-    /* } */
+    int ret = 0;
+    FOR(i,0,n){
+        ret += len[i]/2;
+    }
+    whatis(ret)
     return len;
 }
 
@@ -70,17 +78,8 @@ int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     string s = "aab";
     int n = s.size();
-	string ss = s;
-    s.resize(n*2-1);
-    FOR(i,0,n*2-1){
-        if(i&1)
-            s[i] = '.';
-        else
-            s[i] = ss[i/2];
-    }
-    n = n*2-1;
     vi d1 = pal_array(s);
-    FOR(i,0,n)
+    FOR(i,0,2*n+1)
         cout << d1[i] << ' ';
     cout << '\n';
 }
