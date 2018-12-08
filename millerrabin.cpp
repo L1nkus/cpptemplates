@@ -11,7 +11,7 @@
 #define FORREV(x,plus,arr) for(auto x = (arr).rbegin()+(plus); x !=(arr).rend(); ++x)
 #define REE(s_) {cout<<s_<<'\n';exit(0);}
 #define GET(arr) for(auto &i: (arr)) sc(i)
-#define whatis(x) cerr << #x << " is " << x << endl;
+#define whatis(x) cerr << #x << " is " << (x) << endl;
 #define e1 first
 #define e2 second
 #define INF 0x7f7f7f7f
@@ -39,7 +39,9 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define N 1000001
 
+//if needed, replace operator with this
 inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
     if(b == 1) return a;
     if(b&1){
@@ -48,42 +50,51 @@ inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
     return mulmod(a,b >> 1,mod)*2%mod;
 }
 
-int64_t mod = 1000000007;
-inline int64_t fastpow(int64_t a, int64_t b){
+inline uint64_t fastpow(uint64_t a, uint64_t b, uint64_t mod){
     if(b == 1)
         return a;
     if(b&1){
-        return (a * fastpow(a,b^1)) % mod;
+        return (a * fastpow(a,b^1,mod)) % mod;
     }
-    a = fastpow(a,b >> 1);
+    a = fastpow(a,b >> 1,mod);
     return (a*a)%mod;
 }
 
-int gcdExtended(int a, int b, int *x, int *y){
-    if (a == 0){
-        *x = 0, *y = 1;
-        return b;
+//Miller-Rabin
+inline bool isprime(ull n){
+    if(n == 1) return 0;
+    if(n == 2) return 1;
+    if(n%2 == 0) return 0;
+    ull magic[] = {2,3,5,7,11,13,17,19,23,29,31,37}; //enough for <= 1 << 64
+    ull d = n;
+    --d;
+    ull r = 0;
+    while(d%2)
+        d /= 2, ++r;
+    bool pr = 1;
+    FORR(k,magic){
+        if(k >= n) break;
+        ull x = fastpow(k,d,n);
+        if(x == 1 || x == n-1) continue;
+        bool kk = 1;
+        FOR(i,0,r-1){
+            x = x*x%n;
+            if(x == n-1){
+                k = 0;
+                break;
+            }
+        }
+        if(kk){
+            pr = 0;
+            break;
+        }
     }
-    int x1, y1;
-    int gcd = gcdExtended(b%a, a, &x1, &y1);
-    *x = y1 - (b/a) * x1;
-    *y = x1;
-    return gcd;
-}
-
-//dzielnik i modulo musza byc wzglednie pierwsze
-//jesli oba sa PIERWSZE, mozna tez uzyskac invb=fastpow(b,mod-2) % mod
-int modInverse(int a, int m) {
-    int x, y;
-    gcdExtended(a, m, &x, &y);
-    return (x%m + m) % m;
+    return pr;
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int a = 14, b = 7;
-    int invb = modInverse(b,mod);
-    int adivbmodmod = a*invb%mod;
-    cout << adivbmodmod << '\n';
+    FORE(i,1,100)
+        cout << i<< ": " << isprime(i) << '\n';
 }
 

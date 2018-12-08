@@ -44,7 +44,7 @@ typedef long long ftype;
 
 struct point{
     ftype x,y;
-    point();
+    point(): x(0), y(0){};
     point(ftype x, ftype y): x(x), y(y){};
     point& operator+=(const point &t){
         x += t.x;
