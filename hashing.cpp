@@ -62,8 +62,8 @@ int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     string s,pat;
     cin >> s >> pat;
-    //const int A = 3, B = 1 << 15;
-    const long long A = 299, B = 3007000499; //tbh better just use ull with OVflow
+    const long long A = 299, B = 3007000499;
+    /* const long long A2 = 31, B2 = 1000000007; //use double hashes for extra precision */
     ll phash = pat.front();
     FOR(i,1,pat.size()){
         phash = (phash*A+pat[i])%B;

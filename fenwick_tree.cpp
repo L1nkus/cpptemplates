@@ -43,7 +43,7 @@ int n;
 #define N 100000 //The same as array size is the need
 int t[N];
 
-//1 INDEXED
+//1 INDEXED, increment in function if needed
 
 inline void upd(int pos, int val){ //val is delta
     for(;pos <= n;pos += pos & (-pos))
