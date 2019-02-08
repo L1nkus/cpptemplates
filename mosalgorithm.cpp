@@ -50,6 +50,27 @@ inline void inc(int num){
     ans += num * (++cnt[num]*2-1);
 }
 
+inline int64_t hilbertOrder(int x, int y, int pow, int rotate = 0){
+	if (pow == 0){
+		return 0;
+	}
+	int hpow = 1 << (pow-1);
+	int seg = (x < hpow) ? (
+		(y < hpow) ? 0 : 3
+	) : (
+		(y < hpow) ? 1 : 2
+	);
+	seg = (seg + rotate) & 3;
+	const int rotateDelta[4] = {3, 0, 0, 1};
+	int nx = x & (x ^ hpow), ny = y & (y ^ hpow);
+	int nrot = (rotate + rotateDelta[seg]) & 3;
+	int64_t subSquareSize = int64_t(1) << (2*pow - 2);
+	int64_t ans = seg * subSquareSize;
+	int64_t add = hilbertOrder(nx, ny, pow-1, nrot);
+	ans += (seg == 1 || seg == 2) ? add : (subSquareSize - add - 1);
+	return ans;
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int n,t;
@@ -57,16 +78,20 @@ int main(){
     FOR(i,0,n)
         sc(in[i]);
     struct query{
-        int L,R,id;
+        int L,R,id,ord;
     };
     query qu[t];
+    int k = 1;
+    while(1 << k < n) ++k;
     FOR(i,0,t){
         sc(qu[i].L,qu[i].R);
         --qu[i].L, --qu[i].R;
         qu[i].id = i;
+        qu[i].ord = hilbertOrder(qu[i].L,qu[i].R,k);
     }
-    const int S = sqrt(n)+1;
-    sort(qu,qu+t,[&](const query &f, const query &s){return f.L/S != s.L/S ? f.L/S<s.L/S : (f.R>s.R)^(f.L/S%2);});
+    /* const int S = sqrt(n)+1; */
+    /* sort(qu,qu+t,[&](const query &f, const query &s){return f.L/S != s.L/S ? f.L/S<s.L/S : (f.R>s.R)^(f.L/S%2);}); */
+    sort(qu,qu+t,[](const query &f, const query &s){return f.ord<s.ord;});
     int curl = 0, curr = 0;
     cnt[in[0]] = 1;
     ans = in[0];

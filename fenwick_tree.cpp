@@ -47,6 +47,7 @@ int t[N];
 
 inline void upd(int pos, int val){ //val is delta
     for(;pos <= n;pos += pos & (-pos))
+            //simply for(;posy <= m;posy += posy & (-posy)) for 2nd dimension
         t[pos] += val;
 }
 
