@@ -89,9 +89,10 @@ int main(){
         qu[i].id = i;
         qu[i].ord = hilbertOrder(qu[i].L,qu[i].R,k);
     }
-    /* const int S = sqrt(n)+1; */
+    /* const int S = sqrt(n)+1; //THAT'S SLOWER */
+    const int S = n/sqrt(t)+1; //THAT'S MUCH BETTER
     /* sort(qu,qu+t,[&](const query &f, const query &s){return f.L/S != s.L/S ? f.L/S<s.L/S : (f.R>s.R)^(f.L/S%2);}); */
-    sort(qu,qu+t,[](const query &f, const query &s){return f.ord<s.ord;});
+    sort(qu,qu+t,[](const query &f, const query &s){return f.ord<s.ord;}); //A bit faster
     int curl = 0, curr = 0;
     cnt[in[0]] = 1;
     ans = in[0];
