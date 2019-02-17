@@ -11,7 +11,7 @@
 #define FORREV(x,plus,arr) for(auto x = (arr).rbegin()+(plus); x !=(arr).rend(); ++x)
 #define REE(s_) {cout<<s_<<'\n';exit(0);}
 #define GET(arr) for(auto &i: (arr)) sc(i)
-#define whatis(x) cerr << #x << " is " << x << endl;
+#define whatis(x) cerr << #x << " is " << (x) << endl;
 #define e1 first
 #define e2 second
 #define INF 0x7f7f7f7f
@@ -41,71 +41,48 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-//offline fast;easy lca
+vi adj[N];
+int dfs_min[N], dfs_num[N];
+//Does not include leafs, or edges connected to leafs
+set<int> cutp;
+set<pair<int,int>> bridges; //lower,higher
+int it;
 
-int link[N],size[N];
-vector<int> adj[N];
-vector<int> queries[N];
-bool vis[N];
-int anc[N];
-map<int,int> lca[N]; //May use a lot of memory, so to decrease that, change this into a pair vector and use sort+lower_bound
-
-inline int find(int x){
-    return x == link[x] ? x : link[x] = find(link[x]);
-}
-
-inline int unite(int fa, int fb){
-    if(size[fa] < size[fb]) swap(fa,fb);
-    size[fa] += size[fb];
-    return link[fb] = fa;
-}
-
-int dfs(int v){
-    vis[v] = 1;
-    anc[v] = v;
-    int fv = v;
+void tarjan(int v, int p){
+    dfs_min[v] = dfs_num[v] = ++it;
+    int sons = 0;
     FORR(i,adj[v]){
-        if(!vis[i]){
-            int fi = dfs(i);
-            anc[fv = unite(fi,fv)] = v;
+        if(i == p) continue;
+        if(dfs_num[i]){
+            dfs_min[v] = min(dfs_min[v],dfs_num[i]);
+        }
+        else{
+            tarjan(i,v);
+            dfs_min[v] = min(dfs_min[v],dfs_min[i]);
+            if(dfs_min[i] > dfs_num[v]){
+                bridges.insert({min(i,v),max(i,v)});
+            }
+            if(dfs_min[i] >= dfs_num[v] && p != -1){
+                cutp.insert(v);
+            }
+            ++sons;
         }
     }
-    FORR(i,queries[v]){
-        if(vis[i]){
-            int mn = min(i,v);
-            lca[mn][i+v-mn] = anc[find(i)];
-        }
+    if(p == -1 && sons > 1){
+        cutp.insert(v);
     }
-    return fv;
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int n;
-    cin >> n;
-    int cur;
-    for(int i = 0; i < n; ++i){
-        size[i] = 1;
-        link[i] = i;
-    }
-    for(int i = 1; i < n; ++i){
-        cin >> cur;
-        adj[cur].pb(i);
-    }
-    int q;
-    cin >> q;
+    int n,m;
+    sc(n,m);
     int f,s;
-    vector<pair<int,int>> qu;
-    while(q--){
-        cin >> f >> s;
-        queries[f].pb(s);
-        queries[s].pb(f);
-        int mn = min(f,s);
-        qu.push_back({mn,f+s-mn});
-    }
-    dfs(0);
-    FORR(i,qu){
-        cout << lca[min(i.e1,i.e2)][max(i.e2,i.e1)] << '\n';
+    FOR(i,0,m){
+        sc(f,s);
+        --f,--s;
+        adj[f].pb(s);
+        adj[s].pb(f);
     }
 }
 

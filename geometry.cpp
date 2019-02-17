@@ -131,11 +131,12 @@ double disttosegment(point p, point a, point b){ //dystans punktu p do odcinka A
     return abs(dst);
 }
 
-double polygonarea(vector<point> &v){ //sum of areas of triangles from first vertex, with every 2 adjacent vertexes. Works for non and yes convex, because areas are signed.
+double polygonarea(vector<point> &v){
     int n = v.size();
     double res = 0;
-    for(int i = 1; i+1 < n; ++i){
-        res += cross(v[i]-v[0],v[i+1]-v[0]);
+    for(int i = 0; i < n; ++i){
+        /* res += cross(v[i]-v[0],v[i+1]-v[0]); */
+        res += cross(v[i],v[(i+1)%n]); //works interestingly
     }
     return abs(res/2.0);
 }
