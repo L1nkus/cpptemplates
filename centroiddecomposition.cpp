@@ -47,6 +47,12 @@ int child[N];
 vi adj2[N]; //centroid tree
 int root = -1; //centroid root
 
+//queries on nodes
+//minimum length path to colored node
+
+vector<pair<int,int>> upc[N]; //all centroids this+higher {node,distance to it}
+int mn[N]; //min from centroid
+
 //numer of paths with weight equal 0
 
 ll ans;
@@ -121,12 +127,21 @@ void decomp(int v, int p){ //to get adj2 -> centroid tree
     }
 }
 
-//Use this to calc something for all path, i.e their sum, minimum weight etc.
+void dfs2(int v, int p, int c, int d){
+    upc[v].push_back({c,d});
+    FORR(i,adj[v]){
+        if(i.e1 == p || bloc[i.e1]) continue;
+        dfs2(i.e1,v,c,d+1);
+    }
+}
+
 void gocent(int v){
     FORR(i,vm1)
         m1[i] = 0;
     vm1.clear();
-    rec(v,-1,0);
+    //For all paths:
+        //rec(v,-1,0);
+    dfs2(v,-1,v,0);
     bloc[v] = 1;
     FORR(i,adj2[v]){
         gocent(i);
@@ -149,12 +164,24 @@ int main(){
     }
     pre(0,-1);
     decomp(0,-1);
-    /* whatis(root) */
-    /* FOR(i,0,n){ */
-    /*     whatis(i) */
-    /*     whatis(adj2[i]) */
-    /* } */
+    memset(mn,127,n << 2);
     gocent(root);
+    /* FOR(i,0,q){ */
+    /*     sc(typ,nod); */
+    /*     --nod; */
+    /*     if(typ == 1){ */
+    /*         FORR(i,upc[nod]){ */
+    /*             mn[i.e1] = min(mn[i.e1],i.e2); */
+    /*         } */
+    /*     } */
+    /*     else{ */
+    /*         int ans = INF; */
+    /*         FORR(i,upc[nod]){ */
+    /*             ans = min(ans,mn[i.e1]+i.e2); */
+    /*         } */
+    /*         cout << ans << '\n'; */
+    /*     } */
+    /* } */
     cout << ans << '\n';
 }
 
