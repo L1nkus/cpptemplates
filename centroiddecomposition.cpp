@@ -52,6 +52,7 @@ int root = -1; //centroid root
 ll ans;
 int m1[N*2],m2[N*2];
 vi vm1,vm2; //which nodes contain sth
+//holding it like this + sort is WAY fater than maps
 int len[N]; //number of children under centroid (centroid itself counts)
 
 void rec(int v, int p, int acc){ //do something on centroid, f.e. calc all paths == x going through the centroid
