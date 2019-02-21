@@ -9,6 +9,7 @@ vector<vector<int>> scc;
 stack<int> st;
 int it;
 
+//Order of SCCs is a reverse topological sort of SCC Condensation-DAG
 void tarjan(int cur){
     dfs_num[cur] = dfs_min[cur] = ++it;
     st.push(cur);
