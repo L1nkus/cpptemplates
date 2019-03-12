@@ -43,30 +43,30 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 //Set modifications, Sum queries
 
 #define MAX 10000
-int t[MAX << 2];
+ll t[MAX << 2];
 bool mark[MAX << 2];
 
-void build(int v, int tl, int tr, int *arr){
+void build(ll v, ll tl, ll tr, int *arr){
     if(tl == tr){
         t[v] = arr[tl];
         return;
     }
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     build(v<<1,tl,tm,arr);
     build(v<<1|1,tm+1,tr,arr);
     t[v] = t[v<<1] + t[v<<1|1];
 }
 
-void push(int v, int tl, int tr){
-    int tm = (tl+tr)>>1;
-    int setel = t[v] / (tr-tl+1);
+void push(ll v, ll tl, ll tr){
+    ll tm = (tl+tr)>>1;
+    ll setel = t[v] / (tr-tl+1);
     t[v<<1] = setel * (tm-tl+1);
     t[v<<1|1] = setel * (tr-tm);
     mark[v<<1] = mark[v<<1|1] = 1;
     mark[v] = 0;
 }
 
-void modify(int v, int tl, int tr, int l, int r, int val){
+void modify(ll v, ll tl, ll tr, ll l, ll r, ll val){
     if(l > r) return;
     if(l == tl && r == tr){
         mark[v] = 1;
@@ -75,37 +75,40 @@ void modify(int v, int tl, int tr, int l, int r, int val){
     }
     if(mark[v])
         push(v,tl,tr);
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     modify(v<<1,tl,tm,l,min(tm,r),val);
     modify(v<<1|1,tm+1,tr,max(l,tm+1),r,val);
     t[v] = t[v<<1] + t[v<<1|1];
 }
 
-int query(int v, int tl, int tr, int l, int r){
+ll query(ll v, ll tl, ll tr, ll l, ll r){
     if(l > r) return 0;
     if(l == tl && r == tr){
         return t[v];
     }
     if(mark[v])
         push(v,tl,tr);
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     return query(v<<1,tl,tm,l,min(tm,r)) + query(v<<1|1,tm+1,tr,max(l,tm+1),r);
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8};
-    FORR(i,arr)
-        cerr << i << ' ';
-    cerr << '\n';
-    int n = sizeof arr / sizeof *arr;
-    build(1,0,n-1,arr);
+    /* int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8}; */
+    /* FORR(i,arr) */
+    /*     cerr << i << ' '; */
+    /* cerr << '\n'; */
+    /* int n = sizeof arr / sizeof *arr; */
+    /* build(1,0,n-1,arr); */
+    int n;
+    sc(n);
+    ++n;
     int q,f,s,val,mode;
     sc(q);
     while(q--){
         sc(mode,f,s);
         if(mode == 1){ //query
-            cout << query(1,0,n-1,f,s) << endl;
+            cout << query(1,0,n-1,f,s) << '\n';
             /* cout << query(1,0,n-1,f,s) << '\n'; */
         }
         else{

@@ -43,28 +43,28 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 //Lazy Propagation on Set Modifications, Max queries
 
 #define N 10000
-int t[N << 2];
+ll t[N << 2];
 bool mark[N << 2];
 
-void build(int v, int tl, int tr, int arr[]){
+void build(ll v, ll tl, ll tr, int arr[]){
     if(tl == tr){
         t[v] = arr[tl];
         return;
     }
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     build(v<<1,tl,tm,arr);
     build(v<<1|1,tm+1,tr,arr);
     t[v] = max(t[v<<1], t[v<<1|1]);
 }
 
-void push(int v){
+void push(ll v){
     t[v<<1] = t[v<<1|1] = t[v];
     mark[v<<1] = mark[v<<1|1] = 1;
     mark[v] = 0;
 
 }
 
-void modify(int v, int tl, int tr, int l, int r, int val){
+void modify(ll v, ll tl, ll tr, ll l, ll r, ll val){
     if(l > r) return;
     if(tl == l && tr == r){
         t[v] = val;
@@ -73,20 +73,20 @@ void modify(int v, int tl, int tr, int l, int r, int val){
     }
     if(mark[v])
         push(v);
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     modify(v<<1,tl,tm,l,min(tm,r),val);
     modify(v<<1|1,tm+1,tr,max(l,tm+1),r,val);
     t[v] = max(t[v<<1],t[v<<1|1]);
 }
 
-int query(int v, int tl, int tr, int l, int r){
+ll query(ll v, ll tl, ll tr, ll l, ll r){
     if(l > r) return -0x7f7f7f7f;
     if(tl == l && tr == r){
         return t[v];
     }
     if(mark[v])
         push(v);
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     return max(
     query(v<<1,tl,tm,l,min(tm,r)),
     query(v<<1|1,tm+1,tr,max(l,tm+1),r)

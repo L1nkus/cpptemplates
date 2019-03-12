@@ -44,7 +44,11 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8};
+    /* int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8}; */
+    int n;
+    sc(n);
+    int arr[n+3];
+    memset(arr,0,sizeof arr);
     int q,mode,f,s,val;
     sc(q);
     while(q--){

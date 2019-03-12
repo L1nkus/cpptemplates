@@ -43,21 +43,21 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 //Lazy Propagation on Increment Modifications, Max queries
 
 #define N 10000
-int t[N << 2];
-int lazy[N << 2];
+ll t[N << 2];
+ll lazy[N << 2];
 
-void build(int v, int tl, int tr, int arr[]){
+void build(ll v, ll tl, ll tr, int arr[]){
     if(tl == tr){
         t[v] = arr[tl];
         return;
     }
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     build(v<<1,tl,tm,arr);
     build(v<<1|1,tm+1,tr,arr);
     t[v] = max(t[v<<1] , t[v<<1|1]);
 }
 
-void push(int v){
+void push(ll v){
     if(lazy[v]){
         lazy[v<<1] += lazy[v];
         lazy[v<<1|1] += lazy[v];
@@ -67,7 +67,7 @@ void push(int v){
     }
 }
 
-void modify(int v, int tl, int tr, int l, int r, int inc){
+void modify(ll v, ll tl, ll tr, ll l, ll r, ll inc){
     if(l > r) return;
     if(tl == l && tr == r){
         t[v] += inc;
@@ -75,19 +75,19 @@ void modify(int v, int tl, int tr, int l, int r, int inc){
         return;
     }
     push(v);
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     modify(v<<1,tl,tm,l,min(tm,r),inc);
     modify(v<<1|1,tm+1,tr,max(l,tm+1),r,inc);
     t[v] = max(t[v<<1],t[v<<1|1]);
 }
 
-int query(int v, int tl, int tr, int l, int r){
+ll query(ll v, ll tl, ll tr, ll l, ll r){
     if(l > r) return -0x7f7f7f7f;
     if(tl == l && tr == r){
         return t[v];
     }
     push(v);
-    int tm = (tl+tr)>>1;
+    ll tm = (tl+tr)>>1;
     return max(
     query(v<<1,tl,tm,l,min(tm,r)),
     query(v<<1|1,tm+1,tr,max(l,tm+1),r)

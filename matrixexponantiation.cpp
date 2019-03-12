@@ -76,11 +76,10 @@ void mul1(){
 
 
 void poww(ll k){
-    if(k <= 0) return;
+    if(k <= 1) return;
     if(k&1){
         poww(k-1);
-        if(k != 1)
-            mul1();
+        mul1();
     }
     else{
         poww(k/2);

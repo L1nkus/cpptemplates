@@ -31,11 +31,11 @@ template<typename T> inline void sc(T &num){bool neg=0;int c;num=0;while(c=getch
 inline void getstr(string &str){char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 
 const int N = 1e5+2; //Sometimes must be scaled into a power of 2!!!!!!!!!!!!!
-int t[N*2];
-int n;
+ll t[N*2];
+ll n;
 
-int query(int l, int r){
-    int res = 0;
+ll query(ll l, ll r){
+    ll res = 0;
     for(l+=n, r+=n; l<r; l>>=1, r>>=1){
         if(l&1)
             res = max(res,t[l++]);
@@ -47,7 +47,7 @@ int query(int l, int r){
     return res;
 }
 
-void modify(int p, int val){
+void modify(ll p, ll val){
     for(t[p += n] = val; p > 1; p>>=1)
         t[p>>1] = max(t[p] , t[p^1]);
 }
