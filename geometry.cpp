@@ -78,6 +78,9 @@ struct point{
     point operator/(ftype t) const {
         return point(*this) /= t;
     }
+    bool operator==(point t) const {
+        return x == t.x && y == t.y;
+    }
 };
 point operator*(ftype a, point b) { return b*a; }
 ostream& operator<<(ostream &os, point v) { os<<"[";os<<v.x<<' '<<v.y<<"]"; return os; }
@@ -116,6 +119,7 @@ ftype cross(point a, point b){ //vectory
     //>0 -> na lewo od a (najkrócej ofc)
     //<0 -> na prawo od b
 }
+ftype operator*(point a, point b) { return cross(a,b); }
 
 double disttoline(point p, point a, point b){ //dystans punktu p do lini AB
     ftype crss = cross(b-a,p-a);
@@ -148,7 +152,35 @@ point intersect(point a1, point a2, point b1, point b2){ //intersection of 2 lin
     return a1+c1/c2*b1;
 }
 
+bool cmp(const point &f, const point &s){
+    return f.x<s.x || (f.x==s.x && f.y<s.y);
+}
+
+vector<point> convex_hull(vector<point> a){
+    sort(all(a),cmp);
+    a.erase(unique(all(a)),a.end());
+    if(a.size() == 1) return a;
+    vector<point> up,down;
+    up = down = {a[0]};
+    FORR(i,a){
+        while(up.size() > 1 && (
+    }
+    return hull;
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
+    int n;
+    while(sc(n),n){
+        vector<point> a(n);
+        FOR(i,0,n){
+            sc(a[i].x);
+            sc(a[i].y);
+        }
+        a = convex_hull(a);
+        cout << a.size() << '\n';
+        FORR(i,a)
+            cout << i.x << ' ' << i.y << '\n';
+    }
 }
 

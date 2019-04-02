@@ -50,8 +50,8 @@ void mul2(){
     ll nmat[101][101];
     memset(nmat,0,sizeof nmat);
     FOR(i,0,m){
-        FOR(j,0,m){
-            FOR(k,0,m){
+        FOR(k,0,m){ //better cache optimization
+            FOR(j,0,m){
                 nmat[i][j] += mat[i][k] * mat[k][j];
                 nmat[i][j] %= N;
             }
@@ -64,8 +64,8 @@ void mul1(){
     ll nmat[101][101];
     memset(nmat,0,sizeof nmat);
     FOR(i,0,m){
-        FOR(j,0,m){
-            FOR(k,0,m){
+        FOR(k,0,m){
+            FOR(j,0,m){
                 nmat[i][j] += mat[i][k] * jmat[k][j];
                 nmat[i][j] %= N;
             }

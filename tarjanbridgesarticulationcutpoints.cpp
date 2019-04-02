@@ -73,6 +73,41 @@ void tarjan(int v, int p){
     }
 }
 
+/* vector<int> comp[N]; //components */
+vector<pair<int,int>> comp[N]; //compoments by edges
+int itt;
+bool vis[N];
+stack<pair<int,int>> st;
+
+void bic(int v, int p){
+    dfs_min[v] = dfs_num[v] = ++it;
+    int sons = 0;
+    FORR(i,adj[v]){
+        if(i == p) continue;
+        if(dfs_num[i]){
+            dfs_min[v] = min(dfs_min[v],dfs_num[i]);
+            if(dfs_num[i] < dfs_num[v]){
+                st.push({v,i});
+            }
+        }
+        else{
+            ++sons;
+            st.push({v,i});
+            bic(i,v);
+            dfs_min[v] = min(dfs_min[v],dfs_min[i]);
+            if((p == -1 && sons > 1) || (dfs_min[i] >= dfs_num[v] && p != -1)){
+                while(st.top().e1 != v || st.top().e2 != i){
+                    comp[itt].pb(st.top());
+                    st.pop();
+                }
+                comp[itt].pb(st.top());
+                st.pop();
+                ++itt;
+            }
+        }
+    }
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int n,m;
@@ -83,6 +118,22 @@ int main(){
         --f,--s;
         adj[f].pb(s);
         adj[s].pb(f);
+    }
+    //bridges and cutpoits
+    {
+        tarjan(0,-1); //asserted that graph is connected
+    }
+    //Biconnected components
+    {
+        bic(0,-1);
+        if(!st.empty()){
+            while(!st.empty()){
+                comp[itt].pb(st.top());
+                st.pop();
+            }
+            ++itt;
+        }
+        int nn = itt;
     }
 }
 

@@ -38,16 +38,31 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> inline T mod(T i, T n) { return (i % n + n) % n; }
 
-bool vis[500];
-int assign[500];
-vector<int> adj[500];
+#define N 100001
 
+int vis[N];
+int assign[N];
+vector<int> adj[N];
+
+int matchit; //so you dont have to clear vis
+//INCREMENT BEFORE EACH SALVE OF AUGS
+//2 Grupy muszą być oddzielone w oznaczeniu, tzn. np zajmuja miejsca 0..n-1 n..n+m-1
+//Jesli nie potrzeba takiego speeda, można uniknąć warunku powużej jak wywalisz
+//podówjny assign (tylko zostawiasz dla 2 grupy)
 bool aug(int cur){
-    if(vis[cur]) return 0;
-    vis[cur] = 1;
+    if(vis[cur] == matchit) return 0;
+    vis[cur] = matchit;
     FORR(i,adj[cur]){
-        if(assign[i] == -1 || aug(assign[i])){
+        if(assign[i] == -1){
             assign[i] = cur;
+            assign[cur] = i;
+            return 1;
+        }
+    }
+    FORR(i,adj[cur]){
+        if(aug(assign[i])){
+            assign[i] = cur;
+            assign[cur] = i;
             return 1;
         }
     }
@@ -65,14 +80,37 @@ int main(){
             FOR(x,0,m){
                 sc(tmp);
                 if(tmp)
-                    adj[i].push_back(x);
+                    adj[i].push_back(x+n);
             }
         }
+        memset(assign,-1,(n+m) << 2);
         int mf = 0;
-        memset(assign,-1,m << 2);
-        for(int i = 0; i < n; ++i){
-            memset(vis,0,n);
-            mf += aug(i);
+        //pojedyńczy aug:
+        /* { */
+        /*     ++matchit; */
+        /*     int i = 5; */
+        /*     mf += aug(i); */
+        /* } */
+        //TURBO MATCHING (SERIA)
+        list<int> unm;
+        FOR(i,0,n) unm.push_back(i);
+        int bmf = -1;
+        while(mf > bmf){
+            ++matchit;
+            bmf = mf;
+            for(auto it = unm.begin(); it != unm.end(); ){
+                if(vis[*it] != matchit && !~assign[*it] && aug(*it)){ //WAŻNE ŻEBY NIE NATKĄĆ SIĘ TU NA V Z 2. GRUPY
+                    ++mf;
+                    ++it;
+                    unm.erase(prev(it));
+                }
+                else{
+                    ++it;
+                }
+            }
+            /* FOR(i,0,n){ //WAŻNE ŻEBY NIE NATKĄĆ SIĘ TU NA V Z 2. GRUPY */
+            /*     if(vis[i] != matchit && !~assign[i] && aug(i)) ++mf; */
+            /* } */
         }
         cout << "Case " << cas << ": a maximum of " << mf << " nuts and bolts can be fitted together\n";
     }

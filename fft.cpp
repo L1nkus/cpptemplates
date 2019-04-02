@@ -41,71 +41,49 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 //fast fft
-//CHANGE TO LL ON MOST PROBLEMS
 
 typedef complex<double> cd;
 const double PI = 4*atan(1.);
 
-const int N = 1000000; //max limit
-int rev[N];
-cd wlen_pw[N];
-
-void fft (cd a[], int n, bool invert) {
-	for (int i=0; i<n; ++i)
-		if (i < rev[i])
-			swap (a[i], a[rev[i]]);
-
-	for (int len=2; len<=n; len<<=1) {
-		double ang = 2*PI/len * (invert?-1:+1);
-		int len2 = len>>1;
-
-		cd wlen (cos(ang), sin(ang));
-		wlen_pw[0] = cd (1, 0);
-		for (int i=1; i<len2; ++i)
-			wlen_pw[i] = wlen_pw[i-1] * wlen;
-
-		for (int i=0; i<n; i+=len) {
-			cd t,
-				*pu = a+i,
-				*pv = a+i+len2,
-				*pu_end = a+i+len2,
-				*pw = wlen_pw;
-			for (; pu!=pu_end; ++pu, ++pv, ++pw) {
-				t = *pv * *pw;
-				*pv = *pu - t;
-				*pu += t;
-			}
-		}
+void fft(vector<cd> &a, bool invert){
+    int n = a.size();
+	for (int i=1, j=0; i<n; ++i) {
+		int bit = n >> 1;
+		for (; j>=bit; bit>>=1)
+			j -= bit;
+		j += bit;
+		if (i < j)
+			swap (a[i], a[j]);
 	}
-
-	if (invert)
-		for (int i=0; i<n; ++i)
-			a[i] /= n;
-}
-
-void calc_rev (int n, int log_n) { //only needs to be cainted once for each same size usage of FFT
-	for (int i=0; i<n; ++i) {
-		rev[i] = 0;
-		for (int j=0; j<log_n; ++j)
-			if (i & (1<<j))
-				rev[i] |= 1<<(log_n-1-j);
+    for(int len = 2; len <= n; len <<= 1){
+		double ang = 2*PI/len * (invert ? -1 : 1);
+        cd wn(cos(ang),sin(ang));
+        for(int i = 0; i < n; i += len){
+            cd w(1);
+            for(int j = 0; j < len/2; ++j){
+				cd u = a[i+j],  v = a[i+j+len/2] * w;
+				a[i+j] = u + v;
+				a[i+j+len/2] = u - v;
+                w *= wn;
+            }
+        }
     }
+    if(invert)
+        FOR(i,0,n) a[i] /= n;
 }
 
-    //once to get endsize and use init function for each size
-    /* while((1 << k) < (int)(a.size()+b.size()-1)) ++k; */
-    /* int nn = 1 << k; */
-    /* calc_rev(nn,k); */
-vector<int> multiply(vector<int> a, vector<int> b, int n){
-    cd fa[n],fb[n];
-    fill(copy(a.begin(),a.end(),fa),fa+n,0);
-    fill(copy(b.begin(),b.end(),fb),fb+n,0);
-    fft(fa,n,0);
-    fft(fb,n,0);
+vector<int> multiply(const vector<int> a, const vector<int> b){
+    vector<cd> fa(a.begin(),a.end()), fb(b.begin(),b.end());
+    int k = 0;
+    while((1 << k) < (int)(a.size()+b.size()-1)) ++k;
+    int n = 1 << k;
+    fa.resize(n,0), fb.resize(n,0);
+    fft(fa,0);
+    fft(fb,0);
     for(int i = 0; i < n; ++i){
         fa[i] *= fb[i];
     }
-    fft(fa,n,1);
+    fft(fa,1);
     vector<int> res(n);
     for(int i = 0; i < n; ++i){
         res[i] = int(fa[i].real()+0.5);
@@ -117,11 +95,7 @@ int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     vector<int> a = {3,1,0};
     vector<int> b = {0,1,0,0};
-    int k = 1;
-    while((1 << k) < (int)(a.size()+b.size()-1)) ++k;
-    int nn = 1 << k;
-    calc_rev(nn,k);
-    auto ret = multiply(a,b,nn);
+    auto ret = multiply(a,b);
     FORR(i,ret) cout << i << ' ';
     cout << '\n';
 }

@@ -50,7 +50,7 @@ int root = -1; //centroid root
 //queries on nodes
 //minimum length path to colored node
 
-vector<pair<int,int>> upc[N]; //all centroids this+higher {node,distance to it}
+vector<pair<int,int>> upc[N]; //all centroids this+higher {node,distance to it} -> max logn elements
 int mn[N]; //min from centroid
 
 //numer of paths with weight equal 0
