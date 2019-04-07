@@ -41,99 +41,54 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-vi adj[N];
-int dfs_min[N], dfs_num[N];
-//Does not include leafs, or edges connected to leafs
-set<int> cutp;
-set<pair<int,int>> bridges; //lower,higher
-int it;
+const ll is_query = -(1LL << 62);
 
-void tarjan(int v, int p){ //IF THERE CAN BE MULTIPLE EDGES, HOLD PREVIOUS EDGE RATHER THEN NODE
-    dfs_min[v] = dfs_num[v] = ++it;
-    int sons = 0;
-    FORR(i,adj[v]){
-        if(i == p) continue;
-        if(dfs_num[i]){
-            dfs_min[v] = min(dfs_min[v],dfs_num[i]);
-        }
-        else{
-            tarjan(i,v);
-            dfs_min[v] = min(dfs_min[v],dfs_min[i]);
-            if(dfs_min[i] > dfs_num[v]){
-                bridges.insert({min(i,v),max(i,v)});
-            }
-            if(dfs_min[i] >= dfs_num[v] && p != -1){
-                cutp.insert(v);
-            }
-            ++sons;
-        }
-    }
-    if(p == -1 && sons > 1){
-        cutp.insert(v);
-    }
-}
+struct Line {
+    ll m, b;
+    mutable function<const Line *()> succ;
 
-/* vector<int> comp[N]; //components */
-vector<pair<int,int>> comp[N]; //compoments by edges
-int itt;
-bool vis[N];
-stack<pair<int,int>> st;
-
-void bic(int v, int p){
-    dfs_min[v] = dfs_num[v] = ++it;
-    int sons = 0;
-    FORR(i,adj[v]){
-        if(i == p) continue;
-        if(dfs_num[i]){
-            dfs_min[v] = min(dfs_min[v],dfs_num[i]);
-            if(dfs_num[i] < dfs_num[v]){
-                st.push({v,i});
-            }
-        }
-        else{
-            ++sons;
-            st.push({v,i});
-            bic(i,v);
-            dfs_min[v] = min(dfs_min[v],dfs_min[i]);
-            if((p == -1 && sons > 1) || (dfs_min[i] >= dfs_num[v] && p != -1)){
-                while(st.top().e1 != v || st.top().e2 != i){
-                    comp[itt].pb(st.top());
-                    st.pop();
-                }
-                comp[itt].pb(st.top());
-                st.pop();
-                ++itt;
-            }
-        }
+    bool operator<(const Line &rhs) const {
+        if (rhs.b != is_query) return m < rhs.m;
+        const Line *s = succ();
+        if (!s) return 0;
+        ll x = rhs.m;
+        return b - s->b < (s->m - m) * x;
     }
-}
+};
+
+struct HullDynamic : public multiset<Line> {
+    bool bad(iterator y) {
+        auto z = next(y);
+        if (y == begin()) {
+            if (z == end()) return 0;
+            return y->m == z->m && y->b <= z->b;
+        }
+        auto x = prev(y);
+        if (z == end()) return y->m == x->m && y->b <= x->b;
+        return (x->b - y->b) * (z->m - y->m) >= (y->b - z->b) * (y->m - x->m);
+    }
+
+    void insert_line(ll m, ll b) {
+        auto y = insert({m, b});
+        y->succ = [=] { return next(y) == end() ? 0 : &*next(y); };
+        if (bad(y)) {
+            erase(y);
+            return;
+        }
+        while (next(y) != end() && bad(next(y))) erase(next(y));
+        while (y != begin() && bad(prev(y))) erase(prev(y));
+    }
+
+    ll eval(ll x) {
+        auto l = *lower_bound((Line) {x, is_query});
+        return l.m * x + l.b;
+    }
+};
+
+//eval(x) -> Get maximum value of ax+b on all inserted lines
+//min = -eval(x) on -a -b
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int n,m;
-    sc(n,m);
-    int f,s;
-    FOR(i,0,m){
-        sc(f,s);
-        --f,--s;
-        adj[f].pb(s);
-        adj[s].pb(f);
-    }
-    //bridges and cutpoits
-    {
-        tarjan(0,-1); //asserted that graph is connected
-    }
-    //Biconnected components
-    {
-        bic(0,-1);
-        if(!st.empty()){
-            while(!st.empty()){
-                comp[itt].pb(st.top());
-                st.pop();
-            }
-            ++itt;
-        }
-        int nn = itt;
-    }
 }
 

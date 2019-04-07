@@ -41,7 +41,7 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-ll n,m;
+ll m = 5;
 ll mat[101][101];
 ll jmat[101][101];
 //mat equal to jmat at beginning (1st degree)
@@ -89,5 +89,16 @@ void poww(ll k){
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
+    mat[0][0] = 1;
+    mat[1][1] = 10;
+    mat[0][1] = 1;
+    mat[1][2] = 1;
+    mat[2][2] = 1;
+    /* mat[0][1] = mat[1][0] = mat[1][1] = 1; */
+    memcpy(jmat,mat,sizeof mat);
+    poww(3);
+    /* cout << mat[0][0] << '\n'; */
+    cout << mat[0][1] << '\n';
+    cout << mat[0][2] << '\n';
+    /* cout << mat[1][1] << '\n'; */
 }
-
