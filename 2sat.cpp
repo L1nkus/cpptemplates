@@ -41,66 +41,6 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-const ll is_qu = -(1ll << 61);
-
-struct Line{
-    ll m,b;
-    //pamiętać trzeba mutable i <const Line*()>
-    mutable function<const Line*()> succ; //aby w comparatorze mieć dostęp do nexta Linii
-    bool operator < (const Line &rhs) const{
-        if(rhs.b != is_qu){ //hackish - gdy porównujemy przy insercie liczy się tylko m
-            return m < rhs.m;
-        }
-        //przy lower boundzie - porównujemy z nextem dla danego iksa
-        const Line *nx = succ();
-        if(!nx) return 0;
-        ll x = rhs.m;
-        return x*m+b < x*nx->m+nx->b;
-    }
-};
-
-//inherituje od multisetu, to istotne!
-//multiset nie set (idk czemu, ale tak ma być)
-struct hull : public multiset<Line>{
-    bool bad(iterator y){
-        auto nx = next(y);
-        if(y == begin()){
-            if(nx == end()) return 0;
-            return y->m == nx->m && y->b <= nx->b;
-        }
-        auto pr = prev(y);
-        if(nx == end()){
-            return y->m == pr->m && y->b <= pr->b;
-        }
-        //to cza pamiętać, zawsze najpierw m i b, w 1. najpierw nx potem pr,
-        //potem na odwrót i na odwrót kolejność z y
-        //double żeby overflowu nie było
-        return (double)(nx->m-y->m)*(pr->b-y->b) >= (double)(y->m-pr->m)*(y->b-nx->b);
-    }
-    void insert_line(ll m, ll b){
-        auto y = insert({m,b});
-        // [=]
-        y->succ = [=]{return next(y) == end() ? 0 : &*next(y);}; //referencja nie iterator
-        if(bad(y)){
-            erase(y);
-            return;
-        }
-        while(y != begin() && bad(prev(y))){
-            erase(prev(y));
-        }
-        while(next(y) != end() && bad(next(y))){
-            erase(next(y));
-        }
-    }
-    ll eval(ll x){
-        auto l = *lower_bound((Line){x,is_qu});
-        return l.m*x+l.b;
-    }
-};
-
-//eval(x) -> Get maximum value of ax+b on all inserted lines
-//min = -eval(x) on -a -b
-
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
 }

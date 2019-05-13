@@ -11,15 +11,16 @@
 #define FORREV(x,plus,arr) for(auto x = (arr).rbegin()+(plus); x !=(arr).rend(); ++x)
 #define REE(s_) {cout<<s_<<'\n';exit(0);}
 #define GET(arr) for(auto &i: (arr)) sc(i)
-#define whatis(x) cerr << #x << " is " << (x) << endl;
+#define INF 0x7F7F7F7F //2139062143 | 127 in memset -> memset(arr,127,size)
+#define SINF 1061109567 //Safe INF, for graphs or 2d arrays 63 in memset(arr,63,size)
+#define LL_INF 7234017283807667300 //100 in memset(arr,100,size) !!!must be LL
+#define whatis(x) cerr << #x << " is " << x << endl;
 #define e1 first
 #define e2 second
-#define INF 0x7f7f7f7f
 typedef std::pair<int,int> pi;
 typedef std::vector<int> vi;
 typedef std::vector<std::string> vs;
 typedef int64_t ll;
-typedef uint64_t ull;
 #define umap unordered_map
 #define uset unordered_set
 using namespace std;
@@ -29,79 +30,101 @@ using namespace __gnu_pbds;
 #define getchar_unlocked() _getchar_nolock()
 #define _CRT_DISABLE_PERFCRIT_LOCKS
 #endif
-template<class L, class R> ostream& operator<<(ostream &os, map<L, R> P) { for(auto const &vv: P)os<<"("<<vv.first<<","<<vv.second<<")"; return os; }
-template<class T> ostream& operator<<(ostream &os, set<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class T> ostream& operator<<(ostream &os, vector<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class L, class R> ostream& operator<<(ostream &os, pair<L, R> P) { os<<"("<<P.first<<","<<P.second<<")"; return os; }
+template<typename T> inline void print_128(T num){ if(!num) return; print_128(num / 10); cout.put((num % 10) + '0'); }
 inline int fstoi(const string &str){auto it=str.begin();bool neg=0;int num=0;if(*it=='-')neg=1;else num=*it-'0';++it;while(it<str.end()) num=num*10+(*it++-'0');if(neg)num*=-1;return num;}
 inline void getch(char &x){while(x = getchar_unlocked(), x < 33){;}}
 inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-#define N 1000001
 
-const ll is_qu = -(1ll << 61);
+//Lazy Propagation on Increment Modifications, findmin queries
 
-struct Line{
-    ll m,b;
-    //pamiętać trzeba mutable i <const Line*()>
-    mutable function<const Line*()> succ; //aby w comparatorze mieć dostęp do nexta Linii
-    bool operator < (const Line &rhs) const{
-        if(rhs.b != is_qu){ //hackish - gdy porównujemy przy insercie liczy się tylko m
-            return m < rhs.m;
-        }
-        //przy lower boundzie - porównujemy z nextem dla danego iksa
-        const Line *nx = succ();
-        if(!nx) return 0;
-        ll x = rhs.m;
-        return x*m+b < x*nx->m+nx->b;
-    }
-};
+#define N 10000
+ll t[N << 2];
+ll lazy[N << 2];
 
-//inherituje od multisetu, to istotne!
-//multiset nie set (idk czemu, ale tak ma być)
-struct hull : public multiset<Line>{
-    bool bad(iterator y){
-        auto nx = next(y);
-        if(y == begin()){
-            if(nx == end()) return 0;
-            return y->m == nx->m && y->b <= nx->b;
-        }
-        auto pr = prev(y);
-        if(nx == end()){
-            return y->m == pr->m && y->b <= pr->b;
-        }
-        //to cza pamiętać, zawsze najpierw m i b, w 1. najpierw nx potem pr,
-        //potem na odwrót i na odwrót kolejność z y
-        //double żeby overflowu nie było
-        return (double)(nx->m-y->m)*(pr->b-y->b) >= (double)(y->m-pr->m)*(y->b-nx->b);
+void build(ll v, ll tl, ll tr, int arr[]){
+    if(tl == tr){
+        t[v] = arr[tl];
+        return;
     }
-    void insert_line(ll m, ll b){
-        auto y = insert({m,b});
-        // [=]
-        y->succ = [=]{return next(y) == end() ? 0 : &*next(y);}; //referencja nie iterator
-        if(bad(y)){
-            erase(y);
-            return;
-        }
-        while(y != begin() && bad(prev(y))){
-            erase(prev(y));
-        }
-        while(next(y) != end() && bad(next(y))){
-            erase(next(y));
-        }
-    }
-    ll eval(ll x){
-        auto l = *lower_bound((Line){x,is_qu});
-        return l.m*x+l.b;
-    }
-};
+    lazy[v] = 0;
+    ll tm = (tl+tr)>>1;
+    build(v<<1,tl,tm,arr);
+    build(v<<1|1,tm+1,tr,arr);
+    t[v] = min(t[v<<1] , t[v<<1|1]);
+}
 
-//eval(x) -> Get maximum value of ax+b on all inserted lines
-//min = -eval(x) on -a -b
+void push(ll v){
+    if(lazy[v]){
+        lazy[v<<1] += lazy[v];
+        lazy[v<<1|1] += lazy[v];
+        t[v<<1] += lazy[v];
+        t[v<<1|1] += lazy[v];
+        lazy[v] = 0;
+    }
+}
+
+void modify(ll v, ll tl, ll tr, ll l, ll r, ll inc){
+    if(l > r) return;
+    if(tl == l && tr == r){
+        t[v] += inc;
+        lazy[v] += inc;
+        return;
+    }
+    push(v);
+    ll tm = (tl+tr)>>1;
+    modify(v<<1,tl,tm,l,min(tm,r),inc);
+    modify(v<<1|1,tm+1,tr,max(l,tm+1),r,inc);
+    t[v] = min(t[v<<1],t[v<<1|1]);
+}
+
+pair<int,int> query(int v, int tl, int tr, int l, int r){
+    if(l > r) return {0x7f7f7f7f,0x7f7f7f7f};
+    /* if(t[v]){ */
+    /*     return {0x7f7f7f7f,0x7f7f7f7f}; */
+    /* } */
+    if(tl == l && tr == r && tr == tl){
+        return {t[v],tl};
+        /* if(t[v]){ */
+        /*     return {0x7f7f7f7f,1}; */
+        /* } */
+        /* return {t[v],v}; */
+    }
+    push(v);
+    int tm = (tl+tr)>>1;
+    if(t[v<<1] < t[v<<1|1]){
+        return query(v<<1,tl,tm,l,min(tm,r));
+    }
+    else{
+        return query(v<<1|1,tm+1,tr,max(l,tm+1),r);
+    }
+}
+
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
+    int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8};
+    /* FORR(i,arr) */
+    /*     cout << i << ' '; */
+    /* cout << endl; */
+    int n = sizeof arr / sizeof *arr;
+    build(1,0,n-1,arr);
+    int q,mode,f,s,val;
+    sc(q);
+    while(q--){
+        sc(mode,f,s);
+        if(mode == 1){ //query
+            /* cout << query(1,0,n-1,f,s) << endl; */
+            cout << query(1,0,n-1,f,s) << '\n';
+        }
+        else{
+            sc(val);
+            modify(1,0,n-1,f,s,val);
+        }
+    }
 }
 
