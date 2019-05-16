@@ -50,7 +50,7 @@ int main(){
     int qu[n+1];
     int *quit = qu;
     for(int i = 0; i < nn; ++i){
-        wh[i] = 1;
+        was[i] = 1;
         for(auto &x: scc[i]){
             for(auto &j: adj[x]){
                 if(!was[wh[j]]){
@@ -60,9 +60,9 @@ int main(){
                 }
             }
         }
-        wh[i] = 0;
+        was[i] = 0;
         while(quit != qu){
-            wh[*quit--] = 0;
+            was[*quit--] = 0;
         }
     }
 }
