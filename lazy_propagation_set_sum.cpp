@@ -43,30 +43,30 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 //Set modifications, Sum queries
 
 #define MAX 10000
-ll t[MAX << 2];
+int t[MAX << 2];
 bool mark[MAX << 2];
 
-void build(ll v, ll tl, ll tr, int *arr){
+void build(int v, int tl, int tr, int *arr){
     if(tl == tr){
         t[v] = arr[tl];
         return;
     }
-    ll tm = (tl+tr)>>1;
+    int tm = (tl+tr)>>1;
     build(v<<1,tl,tm,arr);
     build(v<<1|1,tm+1,tr,arr);
     t[v] = t[v<<1] + t[v<<1|1];
 }
 
-void push(ll v, ll tl, ll tr){
-    ll tm = (tl+tr)>>1;
-    ll setel = t[v] / (tr-tl+1);
+void push(int v, int tl, int tr){
+    int tm = (tl+tr)>>1;
+    int setel = t[v] / (tr-tl+1);
     t[v<<1] = setel * (tm-tl+1);
     t[v<<1|1] = setel * (tr-tm);
     mark[v<<1] = mark[v<<1|1] = 1;
     mark[v] = 0;
 }
 
-void modify(ll v, ll tl, ll tr, ll l, ll r, ll val){
+void modify(int v, int tl, int tr, int l, int r, int val){
     if(l > r) return;
     if(l == tl && r == tr){
         mark[v] = 1;
@@ -75,20 +75,20 @@ void modify(ll v, ll tl, ll tr, ll l, ll r, ll val){
     }
     if(mark[v])
         push(v,tl,tr);
-    ll tm = (tl+tr)>>1;
+    int tm = (tl+tr)>>1;
     modify(v<<1,tl,tm,l,min(tm,r),val);
     modify(v<<1|1,tm+1,tr,max(l,tm+1),r,val);
     t[v] = t[v<<1] + t[v<<1|1];
 }
 
-ll query(ll v, ll tl, ll tr, ll l, ll r){
+int query(int v, int tl, int tr, int l, int r){
     if(l > r) return 0;
     if(l == tl && r == tr){
         return t[v];
     }
     if(mark[v])
         push(v,tl,tr);
-    ll tm = (tl+tr)>>1;
+    int tm = (tl+tr)>>1;
     return query(v<<1,tl,tm,l,min(tm,r)) + query(v<<1|1,tm+1,tr,max(l,tm+1),r);
 }
 
