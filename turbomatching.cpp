@@ -92,15 +92,25 @@ int main(){
         /*     mf += aug(i); */
         /* } */
         //TURBO MATCHING (SERIA)
+        list<int> unm;
+        FOR(i,0,n) unm.push_back(i);
         int bmf = -1;
         while(mf > bmf){
             ++matchit;
             bmf = mf;
-            FOR(i,0,n){
-                if(vis[i] != matchit && !~assign[i] && aug(i)){ //WAŻNE ŻEBY NIE NATKĄĆ SIĘ TU NA V Z 2. GRUPY
+            for(auto it = unm.begin(); it != unm.end(); ){
+                if(vis[*it] != matchit && !~assign[*it] && aug(*it)){ //WAŻNE ŻEBY NIE NATKĄĆ SIĘ TU NA V Z 2. GRUPY
                     ++mf;
+                    ++it;
+                    unm.erase(prev(it));
+                }
+                else{
+                    ++it;
                 }
             }
+            /* FOR(i,0,n){ //WAŻNE ŻEBY NIE NATKĄĆ SIĘ TU NA V Z 2. GRUPY */
+            /*     if(vis[i] != matchit && !~assign[i] && aug(i)) ++mf; */
+            /* } */
         }
         cout << "Case " << cas << ": a maximum of " << mf << " nuts and bolts can be fitted together\n";
     }

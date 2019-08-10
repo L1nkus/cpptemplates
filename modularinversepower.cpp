@@ -50,8 +50,8 @@ inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
 
 int64_t mod = 1000000007;
 inline int64_t fastpow(int64_t a, int64_t b){
-    if(b == 1)
-        return a;
+    if(b == 0)
+        return 1;
     if(b&1){
         return (a * fastpow(a,b^1)) % mod;
     }

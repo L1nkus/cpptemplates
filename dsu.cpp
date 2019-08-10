@@ -47,7 +47,10 @@ inline int find(int a){
     return a;
 }
 
-inline void unite(int a, int b){ //a and b are after find()
+inline void unite(int a, int b){ //a and b are after find() //or not, whatever
+    a = find(a);
+    b = find(b);
+    if(a == b) return;
     if(size[a] < size[b]) swap(a,b);
     size[a] += size[b];
     link[b] = a;

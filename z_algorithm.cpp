@@ -38,32 +38,95 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
+int mxi(string s, string t){
+    int low = 0, high = s.size()/t.size();
+    int ans = 0;
+    while(low <= high){
+        int mid = low+(high-low)/2;
+        bool kk = 0;
+        string tt;
+        FOR(i,0,mid)
+            tt += t;
+        string ss = tt+'|'+s;
+        /* if(mid <= 3) */
+        /*     whatis(tt) */
+        int n = ss.size();
+        int z[n];
+        z[0] = 0;
+        int l = 0, r = 0;
+        for(int i = 1; i < n; ++i){
+            if(i > r){
+                l = r = i;
+                while(r < n && ss[r] == ss[r-l]) ++r;
+                z[i] = r-l; --r;
+            }
+            else{
+                int k = i-l;
+                if(z[k] < r-i+1) z[i] = z[k];
+                else{
+                    l = i;
+                    while(r < n && ss[r] == ss[r-l]) ++r;
+                    z[i] = r-l; --r;
+                }
+            }
+            if(z[i] == (int)tt.size()){
+                kk = 1;
+            }
+        }
+        if(kk){
+            ans = mid;
+            //high = mid-1; //Jak najmniejsza
+            low = mid+1; //Jak największa
+        }
+        else{
+            //low = mid+1; //Jak najmniejsza
+            high = mid-1; //Jak największa
+        }
+    }
+    return ans;
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     //Z array - for each index from 1 to n-1 has max length of prefix of string
     //which is also prefix of string beginning at index.
-    string s = "acbacdacbacbacda";
-    int n = s.size();
-    int z[n];
-    z[0] = 0;
-    int l = 0, r = 0;
-    for(int i = 1; i < n; ++i){
-        if(i > r){
-            l = r = i;
-            while(r < n && s[r] == s[r-l]) ++r;
-            z[i] = r-l; --r;
-        }
-        else{
-            int k = i-l;
-            if(z[k] < r-i+1) z[i] = z[k];
-            else{
-                l = i;
-                while(r < n && s[r] == s[r-l]) ++r;
-                z[i] = r-l; --r;
-            }
-        }
+    string in,t;
+    cin >> in >> t;
+    while(in.size() < 1e6){
+        in += in;
     }
-    for(int i = 0; i < n; ++i)
-        cout << z[i] << ' ';
+    /* while(t.size() < 1e6){ */
+    /*     t += t; */
+    /* } */
+    int r1 = mxi(in,t);
+    in += in;
+    int r2 = mxi(in,t);
+    if(r2 > r1){
+        REE(-1)
+    }
+    cout << r2 << '\n';
+    /* string s = "acbacdacbacbacda"; */
+    /* int n = s.size(); */
+    /* int z[n]; */
+    /* z[0] = 0; */
+    /* int l = 0, r = 0; */
+    /* for(int i = 1; i < n; ++i){ */
+    /*     if(i > r){ */
+    /*         l = r = i; */
+    /*         while(r < n && s[r] == s[r-l]) ++r; */
+    /*         z[i] = r-l; --r; */
+    /*     } */
+    /*     else{ */
+    /*         int k = i-l; */
+    /*         if(z[k] < r-i+1) z[i] = z[k]; */
+    /*         else{ */
+    /*             l = i; */
+    /*             while(r < n && s[r] == s[r-l]) ++r; */
+    /*             z[i] = r-l; --r; */
+    /*         } */
+    /*     } */
+    /* } */
+    /* for(int i = 0; i < n; ++i) */
+    /*     cout << z[i] << ' '; */
 }
 
