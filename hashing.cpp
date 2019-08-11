@@ -60,9 +60,12 @@ inline void sc(T &num){
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
+    srand(time(0));
     string s,pat;
     cin >> s >> pat;
-    const long long A = 299, B = 3007000499;
+    const long long B = 3007000499;
+    vi can = {299,293,283,307};
+    const long long A = can[rand()%can.size()];
     /* const long long A2 = 31, B2 = 1000000007; //use double hashes for extra precision */
     ll phash = pat.front();
     FOR(i,1,pat.size()){
