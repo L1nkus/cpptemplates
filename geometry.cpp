@@ -160,27 +160,53 @@ vector<point> convex_hull(vector<point> a){
     sort(all(a),cmp);
     a.erase(unique(all(a)),a.end());
     if(a.size() == 1) return a;
-    vector<point> up,down;
-    up = down = {a[0]};
-    FORR(i,a){
-        while(up.size() > 1 && (
+    vector<point> res;
+    int L = 0;
+    FOR(_,0,2){
+        FORR(C,a){
+            while((int)res.size() >= L + 2){
+                point A = res[(int)res.size() - 2];
+                point B = res[(int)res.size() - 1];
+                if(cross(C-A, B-A) > 0) break; //idk czy nie >=
+                res.pop_back();
+            }
+            res.push_back(C);
+        }
+        res.pop_back();
+        L = res.size();
+        if(!_)
+            reverse(all(a));
     }
-    return hull;
+    return res;
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int n;
-    while(sc(n),n){
+    /* while(sc(n),n){ */
+    while(cin >> n){
         vector<point> a(n);
         FOR(i,0,n){
-            sc(a[i].x);
-            sc(a[i].y);
+            cin >> a[i].x >> a[i].y;
+            /* sc(a[i].x); */
+            /* sc(a[i].y); */
         }
         a = convex_hull(a);
-        cout << a.size() << '\n';
-        FORR(i,a)
-            cout << i.x << ' ' << i.y << '\n';
+        long double ret = 0.0;
+        n = a.size();
+        /* cout << n << '\n'; */
+        /* FOR(i,0,n){ */
+            /* cout << a[i].x << ' ' << a[i].y << '\n'; */
+            /* ret += hypot(a[i].x-a[i-1].x,a[i].y-a[i-1].y); */
+        /* } */
+        FOR(i,1,n){
+            ret += hypot(a[i].x-a[i-1].x,a[i].y-a[i-1].y);
+        }
+        ret += hypot(a[0].x-a[n-1].x,a[0].y-a[n-1].y);
+        cout << roundl(ret) << '\n';
+        /* cout << a.size() << '\n'; */
+        /* FORR(i,a) */
+        /*     cout << i.x << ' ' << i.y << '\n'; */
     }
 }
 
