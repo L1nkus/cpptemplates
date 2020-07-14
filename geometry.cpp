@@ -82,12 +82,61 @@ struct point{
         return x == t.x && y == t.y;
     }
 };
+
+struct point3d{
+    ftype x,y,z;
+    point3d(): x(0), y(0), z(0){};
+    point3d(ftype x, ftype y, ftype z): x(x), y(y), z(z){};
+    point3d& operator+=(const point3d &t){
+        x += t.x;
+        y += t.y;
+        z += t.z;
+        return *this;
+    }
+    point3d& operator-=(const point3d &t){
+        x -= t.x;
+        y -= t.y;
+        z -= t.z;
+        return *this;
+    }
+    point3d& operator*=(ftype t){
+        x *= t;
+        y *= t;
+        z *= t;
+        return *this;
+    }
+    point3d& operator/=(ftype t){
+        x /= t;
+        y /= t;
+        z /= t;
+        return *this;
+    }
+    point3d operator+(const point3d &t) const {
+        return point3d(*this) += t;
+    }
+    point3d operator-(const point3d &t) const {
+        return point3d(*this) -= t;
+    }
+    point3d operator*(ftype t) const {
+        return point3d(*this) *= t;
+    }
+    point3d operator/(ftype t) const {
+        return point3d(*this) /= t;
+    }
+    bool operator==(point3d t) const {
+        return x == t.x && y == t.y && z == t.z;
+    }
+};
+
 point operator*(ftype a, point b) { return b*a; }
 ostream& operator<<(ostream &os, point v) { os<<"[";os<<v.x<<' '<<v.y<<"]"; return os; }
 istream& operator>>(istream &is, point v) { is >> v.x >> v.y; return is; }
+ostream& operator<<(ostream &os, point3d v) { os<<"[";os<<v.x<<' '<<v.y<<' '<<v.z<<"]"; return os; }
+istream& operator>>(istream &is, point3d v) { is >> v.x >> v.y >> v.z; return is; }
 
 //Czy sa w jednej fukcji liniowej, bez floatow, bez dzielenia, bez edge casow
-bool isInLine(const point& p1, const point& p2, const point& p3) {
+bool isinline(const point& p1, const point& p2, const point& p3) {
+    // mozna tez uzyc cross produkt po prostu
     ftype d1x = p2.x - p1.x;
     ftype d1y = p2.y - p1.y;
     ftype d2x = p3.x - p1.x;
@@ -111,6 +160,11 @@ ftype dot(point a, point b){ //vectory
     //<0 -> skierowane w przeciwną stronę
 }
 
+ftype dot(point3d a, point3d b){
+    // pomocne do sprawdzenia, czy wektory są prostopadłe
+    return a.x*b.x+a.y*b.y+a.z*b.z;
+}
+
 ftype cross(point a, point b){ //vectory
     return a.x*b.y - a.y*b.x;
     //|A|*|B|*sin(a,b)
@@ -119,6 +173,14 @@ ftype cross(point a, point b){ //vectory
     //>0 -> na lewo od a (najkrócej ofc)
     //<0 -> na prawo od b
 }
+
+point3d cross(point3d a, point3d b){
+    // zwraca punkt zerowy, jeśli wektory mają równy kierunek
+    // w przeciwnym wypadku, zwraca wektor prostopadły do płaszczyzny
+    // zawierającej oba wejściowe wektory
+    return point3d(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x);
+}
+
 ftype operator*(point a, point b) { return cross(a,b); }
 
 double disttoline(point p, point a, point b){ //dystans punktu p do lini AB
@@ -135,14 +197,24 @@ double disttosegment(point p, point a, point b){ //dystans punktu p do odcinka A
     return abs(dst);
 }
 
-double polygonarea(vector<point> &v){
+void polygonarea(vector<point> &v){
     int n = v.size();
-    double res = 0;
+    ll res = 0;
     for(int i = 0; i < n; ++i){
         /* res += cross(v[i]-v[0],v[i+1]-v[0]); */
         res += cross(v[i],v[(i+1)%n]); //works interestingly
     }
-    return abs(res/2.0);
+    if(res < 0)
+        cout << "CW ";
+    else
+        cout << "CCW ";
+    cout << abs(res/2);
+    if(res&1)
+        cout << ".5";
+    else
+        cout << ".0";
+    cout << '\n';
+    /* return abs(res/2.0); */
 }
 
 point intersect(point a1, point a2, point b1, point b2){ //intersection of 2 lines
@@ -183,27 +255,21 @@ vector<point> convex_hull(vector<point> a){
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int n;
-    /* while(sc(n),n){ */
-    while(cin >> n){
+    while(cin >> n, n){
         vector<point> a(n);
         FOR(i,0,n){
             cin >> a[i].x >> a[i].y;
             /* sc(a[i].x); */
             /* sc(a[i].y); */
         }
-        a = convex_hull(a);
-        long double ret = 0.0;
-        n = a.size();
-        /* cout << n << '\n'; */
-        /* FOR(i,0,n){ */
-            /* cout << a[i].x << ' ' << a[i].y << '\n'; */
-            /* ret += hypot(a[i].x-a[i-1].x,a[i].y-a[i-1].y); */
+        /* a = convex_hull(a); */
+        polygonarea(a);
+        /* cout << floor(ret+0.1); */
+        /* if(ret+0.3 > floor(ret+0.1)+0.5){ */
+        /*     cout << ".5"; */
         /* } */
-        FOR(i,1,n){
-            ret += hypot(a[i].x-a[i-1].x,a[i].y-a[i-1].y);
-        }
-        ret += hypot(a[0].x-a[n-1].x,a[0].y-a[n-1].y);
-        cout << roundl(ret) << '\n';
+        /* cout << '\n'; */
+        /* n = a.size(); */
         /* cout << a.size() << '\n'; */
         /* FORR(i,a) */
         /*     cout << i.x << ' ' << i.y << '\n'; */
