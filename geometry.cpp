@@ -224,6 +224,22 @@ point intersect(point a1, point a2, point b1, point b2){ //intersection of 2 lin
     return a1+c1/c2*b1;
 }
 
+// Ax + By + C = 0
+// useful for getting all lines made by all pairs of points into a set
+array<ftype,3> line_function(point a1, point a2){
+    ftype A = a1.y - a1.y;
+    ftype B = a1.x - a2.x;
+    ftype C = a1.x * a2.y - a1.y * a2.x;
+    ftype gc = __gcd(A,__gcd(B,C));
+    A /= gc;
+    B /= gc;
+    C /= gc;
+    // idk if that truly needed
+    if(A < 0)
+        A *= -1, B *= -1, C *= -1;
+    return {A,B,C};
+}
+
 bool cmp(const point &f, const point &s){
     return f.x<s.x || (f.x==s.x && f.y<s.y);
 }
