@@ -41,7 +41,65 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
+vector<int> adj[N], adjrev[N];
+bool vis[N];
+int comp[N];
+bool assign[N];
+vector<int> order;
+int it;
+
+void d1(int v){
+    vis[v] = 1;
+    for(auto &i: adj[v]){
+        if(!vis[i])
+            d1(i);
+    }
+    order.push_back(v);
+}
+
+void d2(int v){
+    comp[v] = it;
+    for(auto &i: adjrev[v]){
+        if(comp[i] == -1)
+            d2(i);
+    }
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
+    // make sure than 2 * (x) is in brackets
+    int n;
+    // (x or y) -> (~x -> y) and (~y -> x)
+    for(int i = 0; i < n; ++i){
+        for(auto &x: adj[i]){
+            adjrev[x].push_back(i);
+            // Zwolnienie pamięci jeśli trzeba
+            /* adj[i].clear(); */
+            /* adj[i].shrink_to_fit(); */
+        }
+    }
+    for(int i = 0; i < n; ++i){
+        if(!vis[i])
+            d1(i);
+    }
+    memset(comp,-1,n << 2);
+    for(int i = 0; i < n; ++i){
+        int v = order[n - i - 1];
+        if(comp[v] == -1){
+            d2(v);
+            ++it;
+        }
+    }
+    bool kk = 1;
+    for(int i = 0; i < n; i += 2){
+        //i -> x
+        //i+1 -> ~x
+        if(comp[i] == comp[i + 1]){
+            kk = 0;
+            break;
+        }
+        // component x przed componentem ~x w topo <-> x true
+        assign[i / 2] = comp[i] > comp[i + 1];
+    }
 }
 
