@@ -41,10 +41,10 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-//can also solve with hashes in nlogn
+// can also solve with hashes in nlogn
 
-//half-length of maximum odd palindrome with center in i, to get even,
-//separators are added
+// half-length of maximum odd palindrome with center in i, to get even,
+// separators are added
 vector<int> pal_array(string ss){
     string s = ".";
     FOR(i,0,ss.size()){
@@ -65,12 +65,22 @@ vector<int> pal_array(string ss){
             r = i + k;
         }
     }
-        //subpalindome count
+        // subpalindome count
     int ret = 0;
     FOR(i,0,n){
         ret += len[i]/2;
     }
     whatis(ret)
+    int m = ss.size();
+    int mxpal[m]; // max length of palindrome beginning at said pos
+    FOR(i,0,2*m){ // omit last dot here. Needed just for computation.
+        // index of left-boundary of palindrome
+        int ind = i / 2 - (len[i] + 1) / 2 + 1;
+        /* vec[ind].push_back(len[i] - 1); */
+        mxpal[ind] = max(mxpal[ind], len[i] - 1);
+    }
+    FOR(i,1,m)
+        mxpal[i] = max(mxpal[i], mxpal[i-1] - 2);
     return len;
 }
 
