@@ -71,6 +71,30 @@ inline int64_t hilbertOrder(int x, int y, int pow, int rotate = 0){
 	return ans;
 }
 
+// supposively simpler and slightly faster
+constexpr int logn = 20;
+constexpr int maxn = 1 << logn;
+
+long long hilbertorder(int x, int y)
+{
+	long long d = 0;
+	for (int s = 1 << (logn - 1); s; s >>= 1)
+	{
+		bool rx = x & s, ry = y & s;
+		d = d << 2 | (rx * 3 ^ static_cast<int>(ry));
+		if (!ry)
+		{
+			if (rx)
+			{
+				x = maxn - x;
+				y = maxn - y;
+			}
+			swap(x, y);
+		}
+	}
+	return d;
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int n,t;
@@ -88,10 +112,12 @@ int main(){
         --qu[i].L, --qu[i].R;
         qu[i].id = i;
         qu[i].ord = hilbertOrder(qu[i].L,qu[i].R,k);
+        /* qu[i].ord = hilbertorder(qu[i].L,qu[i].R); */
     }
     /* const int S = sqrt(n)+1; //THAT'S SLOWER */
     const int S = n/sqrt(t)+1; //THAT'S MUCH BETTER
-    /* sort(qu,qu+t,[&](const query &f, const query &s){return f.L/S != s.L/S ? f.L/S<s.L/S : (f.R>s.R)^(f.L/S%2);}); */
+    /* sort(qu,qu+t,[&](const query &f, const query &s){return f.L/S != s.L/S ? f.L/S<s.L/S : (f.R>s.R)^(f.L/S%2);}); */ // can rte cause not strictly ordered
+    /* sort(qu,qu+t,[&](const query &f, const query &s){return f.L/S != s.L/S ? f.L/S<s.L/S : (f.R==s.R ? 0 : (f.R>s.R)^(f.L/S%2));}); */
     sort(qu,qu+t,[](const query &f, const query &s){return f.ord<s.ord;}); //A bit faster
     int curl = 0, curr = 0;
     cnt[in[0]] = 1;
