@@ -1,3 +1,5 @@
+/* #pragma GCC optimize("Ofast") */
+/* #pragma GCC target("avx2") */
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -41,16 +43,16 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-ll m = 5;
+constexpr ll m = 101;
 ll mat[101][101];
 ll jmat[101][101];
-//mat equal to jmat at beginning (1st degree)
+// mat equal to jmat at beginning (1st degree)
 
 void mul2(){
     ll nmat[101][101];
     memset(nmat,0,sizeof nmat);
     FOR(i,0,m){
-        FOR(k,0,m){ //better cache optimization
+        FOR(k,0,m){ // better cache optimization
             FOR(j,0,m){
                 nmat[i][j] += mat[i][k] * mat[k][j];
                 nmat[i][j] %= N;
@@ -62,6 +64,8 @@ void mul2(){
 
 void mul1(){
     ll nmat[101][101];
+    // chg memset value if getting min
+    // avoid any ifs cause that prevent vectorization
     memset(nmat,0,sizeof nmat);
     FOR(i,0,m){
         FOR(k,0,m){
