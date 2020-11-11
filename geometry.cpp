@@ -42,6 +42,9 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 typedef long long ftype;
 //typ (int, ll, double)?
 
+// geo stuff in other files:
+// halfplane intersections
+
 struct point{
     ftype x,y;
     point(): x(0), y(0){};
@@ -80,6 +83,9 @@ struct point{
     }
     bool operator==(point t) const {
         return x == t.x && y == t.y;
+    }
+    bool operator<(point t) const {
+        return x != t.x ? x < t.x : y < t.y;
     }
 };
 
@@ -130,9 +136,9 @@ struct point3d{
 
 point operator*(ftype a, point b) { return b*a; }
 ostream& operator<<(ostream &os, point v) { os<<"[";os<<v.x<<' '<<v.y<<"]"; return os; }
-istream& operator>>(istream &is, point v) { is >> v.x >> v.y; return is; }
+istream& operator>>(istream &is, point &v) { is >> v.x >> v.y; return is; }
 ostream& operator<<(ostream &os, point3d v) { os<<"[";os<<v.x<<' '<<v.y<<' '<<v.z<<"]"; return os; }
-istream& operator>>(istream &is, point3d v) { is >> v.x >> v.y >> v.z; return is; }
+istream& operator>>(istream &is, point3d &v) { is >> v.x >> v.y >> v.z; return is; }
 
 //Czy sa w jednej fukcji liniowej, bez floatow, bez dzielenia, bez edge casow
 bool isinline(const point& p1, const point& p2, const point& p3) {
@@ -197,6 +203,7 @@ double disttosegment(point p, point a, point b){ //dystans punktu p do odcinka A
     return abs(dst);
 }
 
+// triangulacja też może być
 void polygonarea(vector<point> &v){
     int n = v.size();
     ll res = 0;
@@ -204,6 +211,9 @@ void polygonarea(vector<point> &v){
         /* res += cross(v[i]-v[0],v[i+1]-v[0]); */
         res += cross(v[i],v[(i+1)%n]); //works interestingly
     }
+    // some another interesting way
+    /* for (int i = 0; i < n; ++i) */
+    /*         area += poly[i].x * (poly[next(i, n)].y - poly[prev(i, n)].y); */
     if(res < 0)
         cout << "CW ";
     else
@@ -217,7 +227,22 @@ void polygonarea(vector<point> &v){
     /* return abs(res/2.0); */
 }
 
-point intersect(point a1, point a2, point b1, point b2){ //intersection of 2 lines
+// sortowanie kątowe względem punktu p
+// epsilony można dodać w strukcie, a czasem wartoby
+void sortowanie_katowe(vector<point> &vec, point p){
+    sort(all(vec),[&](auto &f, auto &s){
+            bool ba = f < p, bb = s < p;
+            if(ba != bb)
+                return ba > bb;
+            point p1 = f.e1 - p;
+            point p2 = s.e1 - p;
+            return cross(p1, p2) < 0;});
+}
+
+// a1, a2 -> punkty
+// b1, b2 -> wektory
+// jak linia to dwa punkty, to b1 = pa2 - pa1
+point intersect(point a1, point a2, point b1, point b2){ // intersection of 2 lines
     ftype c1 = cross(a2-a1,b2);
     ftype c2 = cross(b1,b2);
     if(!c2) return {-INF,INF}; //parallel
