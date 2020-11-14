@@ -25,6 +25,9 @@ typedef uint64_t ull;
 using namespace std;
 using namespace __gnu_pbds;
 
+#ifdef ONLINE_JUDGE
+#define whatis(x) ;
+#endif
 #ifdef _WIN32
 #define getchar_unlocked() _getchar_nolock()
 #define _CRT_DISABLE_PERFCRIT_LOCKS
@@ -39,89 +42,82 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-#define N 1000000
-//range-range lazy propagation with arithmetic progression based updates
-//(sum query)
+#define N 1000001
 
-struct el{ //arithmetic progrestion
-    int fir;
-    int dif;
-};
-
-int t[N << 2]; //sum
-el lazy[N << 2]; //value to propagate
-
-void init(int v, int l, int r, int a[]){
-    if(l == r){
-        t[v] = a[l];
-        return;
-    }
-    int m = (l+r)>>1;
-    init(v<<1,l,m,a);
-    init(v<<1|1,m+1,r,a);
-    t[v] = t[v<<1]+t[v<<1|1];
-}
+ll t[N << 2];
+pair<ll,ll> lazy[N << 2];
+bool lazyclr[N << 2];
 
 void prop(int v, int tl, int tr){
-    if(!(lazy[v].fir | lazy[v].dif))
+    if(!(lazyclr[v] | lazy[v].e1 | lazy[v].e2))
         return;
-    int tm = (tl+tr) >> 1;
-    int ll =  (tm-tr+1)*(lazy[v].fir*2+lazy[v].dif*(tm-tr))/2;
-    t[v<<1] += ll;
-    t[v<<1|1] += (tr-tl+1)*(lazy[v].fir*2+lazy[v].dif*(tr-tl))/2 - ll;
-    lazy[v<<1].fir += lazy[v].fir;
-    lazy[v<<1].dif += lazy[v].dif;
-    lazy[v<<1|1].fir += lazy[v].fir+lazy[v].dif*(tm+1-tl);
-    lazy[v<<1|1].dif += lazy[v].dif;
-    lazy[v] = {0,0};
+    if(tl != tr){
+        if(lazyclr[v]){
+            lazy[v << 1] = {0,0};
+            lazy[v << 1 | 1] = {0,0};
+            lazyclr[v << 1] = 1;
+            lazyclr[v << 1 | 1] = 1;
+            t[v << 1] = 0;
+            t[v << 1 | 1] = 0;
+        }
+        int tm = (tl + tr) / 2;
+        lazy[v << 1].e1 += lazy[v].e1;
+        lazy[v << 1].e2 += lazy[v].e2;
+        ll rfir = lazy[v].e1 + (tm + 1 + 1 - tl - 1) * lazy[v].e2;
+        lazy[v << 1 | 1].e1 += rfir;
+        lazy[v << 1 | 1].e2 += lazy[v].e2;
+        int len1 = tm - tl + 1;
+        int len2 = tr - (tm + 1) + 1;
+        t[v << 1] += (lazy[v].e1 + lazy[v].e1 + (len1 - 1) * lazy[v].e2) * len1 / 2;
+        t[v << 1 | 1] += (rfir + rfir + (len2 - 1) * lazy[v].e2) * len2 / 2;
+    }
+    lazyclr[v] = 0;
+    lazy[v].e1 = 0;
+    lazy[v].e2 = 0;
 }
 
-void update(int v, int tl, int tr, int l, int r, el cel){
-    if(l > r) return;
+// seq musi być zgodny wględem [l,r];
+// ważne żeby l >= 0 i r <= n - 1 tu
+void update(int v, int tl, int tr, int l, int r, pair<ll,ll> seq){
+    if(l > r)
+        return;
     if(tl == l && tr == r){
-        t[v] += (tr-tl+1)*(cel.fir*2+cel.dif*(tr-tl))/2;
-        lazy[v].fir += cel.fir;
-        lazy[v].dif += cel.dif;
+        int len = tr - tl + 1;
+        t[v] += (seq.e1 + seq.e1 + (len - 1) * seq.e2) * len / 2;
+        lazy[v].e1 += seq.e1;
+        lazy[v].e2 += seq.e2;
         return;
     }
-    prop(v,tl,tr);
-    int tm = (tl+tr)>>1;
-    update(v<<1,tl,tm,l,min(tm,r),cel);
-    update(v<<1|1,tm+1,tr,max(l,tm+1),r,{cel.fir+cel.dif*(max(l,tm+1)-l),cel.dif});
-    t[v] = t[v<<1]+t[v<<1|1];
+    prop(v, tl, tr);
+    int tm = (tl + tr) / 2;
+    update(v << 1, tl, tm, l, min(r,tm), seq);
+    int ldif = max(0, tm + 1 - l);
+    update(v << 1 | 1, tm + 1, tr, max(l,tm + 1), r, {seq.e1 + ldif * seq.e2, seq.e2});
+    t[v] = t[v << 1] + t[v << 1 | 1];
 }
 
-int query(int v, int tl, int tr, int l, int r){
-    if(l > r) return 0;
+// zawsze 0 .. N - 1
+void updateclr(int v, int tl, int tr){
+    // override lazy always
+    lazyclr[v] = 1;
+    lazy[v] = {0,0};
+    t[v] = 0;
+    return;
+}
+
+ll query(int v, int tl, int tr, int l, int r){
+    if(l > r)
+        return 0;
     if(tl == l && tr == r){
         return t[v];
     }
-    prop(v,tl,tr);
-    int tm = (tl+tr)>>1;
-    return query(v<<1,tl,tm,l,min(tm,r)) +
-    query(v<<1|1,tm+1,tr,max(l,tm+1),r);
+    prop(v, tl, tr);
+    int tm = (tl + tr) / 2;
+    return query(v << 1, tl, tm, l, min(r,tm)) +
+    query(v << 1 | 1, tm + 1, tr, max(l,tm + 1), r);
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int n;
-    sc(n);
-    int a[n];
-    /* GET(a); */
-    FOR(i,0,n)
-        a[i] = 0;
-    init(1,0,n-1,a);
-    int q,t,l,r,fir,dif;
-    sc(q);
-    while(q--){
-        sc(t,l,r);
-        if(t == 1){ //update
-            sc(fir,dif);
-            update(1,0,n-1,l,r,{fir,dif});
-        }
-        else{
-            cout << query(1,0,n-1,l,r) << endl;
-        }
-    }
 }
 
