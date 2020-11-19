@@ -73,13 +73,19 @@ int lca(int f, int s){
     if(d[f] > d[s]) swap(f,s);
     s = ancestor(s,d[s]-d[f]);
     if(f == s) return f;
-    for(int i = 0; i < 10; ++i){
+    // this was a very bad bug
+    /* for(int i = 0; i < 10; ++i){ */
+    for(int i = 9; i >= 0; --i){
         if(anc[f][i] != anc[s][i]){
             f = anc[f][i];
             s = anc[s][i];
         }
     }
     return anc[f][0];
+}
+
+int dist(int f, int s){
+    return d[f] + d[s] - 2 * d[lca(f,s)];
 }
 
 int main(){
