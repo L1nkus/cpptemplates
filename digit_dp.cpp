@@ -38,7 +38,7 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-//Suma cyfr liczb od 0 do n
+// Suma cyfr liczb od 0 do n
 ll dp[20][155][2]; //{index, suma, czy bez limitu} -> ilosc spelniajacych warunki state-a
 
 ll qu(string n){
@@ -48,13 +48,14 @@ ll qu(string n){
     memset(dp,0,sizeof dp);
     dp[0][0][0] = 1;
     int len = n.size();
-    //Gdyz tutaj liczby o mniejszej ilosci cyfr tak naprawde skladaja sie z
-    //leading zeros przed nimi, jesli one wplywaja na statey, trzeba dolozyc
-    //dodatkowy case - czy byla juz jakas zaczeta liczba, oraz dodatkowo
-    //rozwazyc '0'
+    // Gdyz tutaj liczby o mniejszej ilosci cyfr tak naprawde skladaja sie z
+    // leading zeros przed nimi, jesli one wplywaja na statey, trzeba dolozyc
+    // dodatkowy case - czy byla juz jakas zaczeta liczba, oraz dodatkowo
+    // rozwazyc '0'
     for(int i = 0; i < len; ++i){
         for(int t = 0; t < 2; ++t){ //t == 1 -> brak limitu
             for(int s = 0; s < 155; ++s){
+                // if(!dp[i][s][t]) continue might speed it up 2x
                 for(int d = 0; d < 10; ++d){
                     if(!t && n[i] < d) break;
                     int nt = (t | (d < n[i]));
@@ -72,11 +73,53 @@ ll qu(string n){
     return ans;
 }
 
+ll dppre[21][155];
+
+void pre(){
+    // Traktując pos == 0 jako końcowy state -> jaki ma wkład w odpowiedź
+    // Jeśli tylko 1 dobry state, to tylko jedno = 1 na początku
+    FOR(i,0,155){
+        dppre[0][i] = i;
+    }
+    for(int i = 1; i <= 20; ++i){
+        for(int s = 0; s < 155; ++s){
+            for(int d = 0; d < 10; ++d){
+                // next state wyliczany dokładnie tak samo jak normalnie,
+                // ale aplikowany do poprzednika
+                dppre[i][s] += dppre[i-1][s + d];
+            }
+        }
+    }
+}
+
+// Liniowe od długości liczby, bo zawsze jest tylko n statów z t == 0 (limitem)
+ll qupostpre(string n){
+    ll res = 0;
+    for(auto &i: n){
+        i -= '0';
+    }
+    int len = n.size();
+    int suma = 0;
+    for(int i = 0; i < len; ++i){
+        for(int d = 0; d < n[i]; ++d){
+            int nsuma = suma + d;
+            res += dppre[len - i - 1][nsuma];
+        }
+        // Next state dla d == n[i], czyli jedynego dalszego z t == 0
+        suma = suma + n[i];
+    }
+    // W pętli wyliczane jest exclusive samo n, więc na końcu trzeba dodać
+    // wynik dla całej liczby, a mamy zapisany state końcowy w zmiennych
+    res += suma;
+    return res;
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int t;
     cin >> t;
     string a,b;
+    pre();
     while(t--){
         cin >> a >> b;
         ll res = qu(b);
@@ -95,8 +138,10 @@ int main(){
                 else
                     --*it;
             }
-            res -= qu(a); //IF MODUOLING, DON'T FORGET TO CORRECT IN CASE RES GOES NEGATIVE
+            res -= qu(a); // IF MODUOLING, DON'T FORGET TO CORRECT IN CASE RES GOES NEGATIVE
         }
         cout << res << '\n';
+        ll res2 = qupostpre(b) - qupostpre(a);
+        cout << res2 << '\n';
     }
 }
