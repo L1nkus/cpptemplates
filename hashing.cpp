@@ -42,8 +42,13 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 
 ll mul(ll a, ll b, ll m){
     ll q = (long double)a * (long double)b / (long double)m;
-    ll p = a*b/m*q;
+    // wait '-' zamiast '/' powinien tu byc?
+    /* ll p = a*b/m*q; */
+    // https://codeforces.com/blog/entry/1729
+    // -> tak
+    ll p = a*b-m*q;
     return (p+5*m)%m;
+    // mozna ifa dac zamiast tego +5*m
 }
 
 template<typename T>
@@ -63,8 +68,13 @@ int main(){
     srand(time(0));
     string s,pat;
     cin >> s >> pat;
+    /* FORR(i,s){ */
+    /*     i -= 'a'; */
+    /*     ++i; */
+    /* } */
     const long long B = 3007000499;
     vi can = {299,293,283,307};
+    /* vi can = {31}; */
     const long long A = can[rand()%can.size()];
     /* const long long A2 = 31, B2 = 1000000007; //use double hashes for extra precision */
     ll phash = pat.front();
@@ -81,10 +91,12 @@ int main(){
     FOR(i,1,s.size()){
         p[i] = (p[i-1]*A)%B;
     }
+    auto hs = [&](int l, int r){
+        return ((h[r] - (l ? mul(h[l-1],p[r-l+1],B) : 0)) % B + B) % B;
+    };
     int sz = s.size()-pat.size()+1;
     FOR(i,0,sz){
         if((h[i+pat.size()-1]-(i?(h[i-1]*p[pat.size()])%B:0))%B == phash)
             cout << "Found at " << i << '\n';
     }
 }
-
