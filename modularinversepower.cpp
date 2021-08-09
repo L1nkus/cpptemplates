@@ -48,7 +48,7 @@ inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
     return mulmod(a,b >> 1,mod)*2%mod;
 }
 
-int64_t mod = 1000000007;
+constexpr int64_t mod = 1000000007;
 inline int64_t fastpow(int64_t a, int64_t b){
     if(b == 0)
         return 1;
@@ -77,6 +77,18 @@ int modInverse(int a, int m) {
     int x, y;
     gcdExtended(a, m, &x, &y);
     return (x%m + m) % m;
+}
+
+ll fac[N];
+ll facinv[N];
+
+void pre(){
+    fac[0] = 1;
+    FOR(i,1,N)
+        fac[i] = fac[i - 1] * i % mod;
+    facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
+    for(int i = N - 2; i >= 0; --i)
+        facinv[i] = facinv[i + 1] * (i + 1) % mod;
 }
 
 int main(){
