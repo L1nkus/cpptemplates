@@ -82,6 +82,7 @@ int modInverse(int a, int m) {
 ll fac[N];
 ll facinv[N];
 
+// constexpr btw?
 void pre(){
     fac[0] = 1;
     FOR(i,1,N)
@@ -89,6 +90,7 @@ void pre(){
     facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
     for(int i = N - 2; i >= 0; --i)
         facinv[i] = facinv[i + 1] * (i + 1) % mod;
+    // Also i^-1 = facinv[i] * fac[i - 1] (i in 1..n)
 }
 
 int main(){
