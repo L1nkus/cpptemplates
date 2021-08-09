@@ -1,6 +1,25 @@
-#include <bits/stdc++.h>
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <stdlib.h>
+#include <ctime>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <iostream>
+#include <cctype>
+#include <cstring>
+#include <numeric>
+#include <bitset>
+#include <stack>
+#include <functional>
+#include <cassert>
+#include <tuple>
+#include <iomanip>
 #define pb push_back
 #define mp make_pair
 #define all(a) begin(a),end(a)
@@ -23,7 +42,6 @@ typedef uint64_t ull;
 #define umap unordered_map
 #define uset unordered_set
 using namespace std;
-using namespace __gnu_pbds;
 
 #ifdef _WIN32
 #define getchar_unlocked() _getchar_nolock()
@@ -37,8 +55,7 @@ inline int fstoi(const string &str){auto it=str.begin();bool neg=0;int num=0;if(
 inline void getch(char &x){while(x = getchar_unlocked(), x < 33){;}}
 inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
-template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
-template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define N 1000000
 
 inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
     if(b == 1) return a;
@@ -91,10 +108,13 @@ void pre(){
     for(int i = N - 2; i >= 0; --i)
         facinv[i] = facinv[i + 1] * (i + 1) % mod;
     // Also i^-1 = facinv[i] * fac[i - 1] (i in 1..n)
+    // Similary idea can be used to get invs of any n numbers in O(n + logp).
+    // -> zamiast *1, *2, *3... do *a[0], *a[1], *a[2]...
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
+    pre();
     int a = 5, b = 2;
     int invb = modInverse(b,mod);
     int adivbmodmod = a*invb%mod;
