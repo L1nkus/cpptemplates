@@ -42,6 +42,10 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 
 //fast fft
 
+// Radewoosh ma ciekawe z jakimiś anti-precision error tricks:
+// https://codeforces.com/contest/1548/submission/124596600
+// ^^ więc no NTT needed even with modulos.
+
 typedef complex<double> cd;
 const double PI = 4*atan(1.);
 
