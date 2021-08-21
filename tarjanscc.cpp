@@ -45,9 +45,9 @@ int main(){
         }
     }
     int nn = scc.size();
-    bool was[n];
-    memset(was,0,n);
-    int qu[n+1];
+    bool was[nn];
+    memset(was,0,nn);
+    int qu[nn+1];
     int *quit = qu;
     for(int i = 0; i < nn; ++i){
         was[i] = 1;

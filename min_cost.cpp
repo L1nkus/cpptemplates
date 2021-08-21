@@ -48,6 +48,17 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 // ograniczone out-edgea, to trzeba dodać dodatkowy node z jednym inem od tego,
 // aby na pewno ograniczenia co do całkowitego out-flowu z tego nodea się zgadzały
 
+// Btw, ten graf nie może mieć ujemnych cykli -> Przed aplikowaniem mcmf trzeba
+// tak przekształcić graf, aby nie miał ujemnych cykli, czyli either jakaś
+// konwersja do scc może być potrzebna, albo findowanie edgea z najmniejszym
+// capacity w cyklu, i zastąpianie cyklu jednym nodem będącym bottleneckiem
+// jakoś (https://codeforces.com/blog/entry/53404).
+
+// Also, wtf, this implementation had TLE on atcoder problem with 4s tle, while
+// atcoder library mcmf passed in 257ms (though it doesn't support negative
+// edges). This version didn't pass even without negative edges.
+// https://atcoder.jp/contests/abc214/submissions/25128817 vs https://atcoder.jp/contests/abc214/submissions/25128832
+
 // Tomasz Nowak, Michał Staniewski
 struct MCMF {
     struct Edge {

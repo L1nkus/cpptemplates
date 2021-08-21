@@ -55,7 +55,7 @@ inline int fstoi(const string &str){auto it=str.begin();bool neg=0;int num=0;if(
 inline void getch(char &x){while(x = getchar_unlocked(), x < 33){;}}
 inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
-#define N 1000000
+#define N 1000001
 
 inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
     if(b == 1) return a;
@@ -104,7 +104,14 @@ void pre(){
     fac[0] = 1;
     FOR(i,1,N)
         fac[i] = fac[i - 1] * i % mod;
+#if N == 1000001
+    if constexpr (mod == 1000000007)
+        facinv[N - 1] = 397802501;
+    else
+        facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
+#else
     facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
+#endif
     for(int i = N - 2; i >= 0; --i)
         facinv[i] = facinv[i + 1] * (i + 1) % mod;
     // Also i^-1 = facinv[i] * fac[i - 1] (i in 1..n)

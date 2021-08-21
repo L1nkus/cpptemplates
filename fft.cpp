@@ -46,6 +46,9 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 // https://codeforces.com/contest/1548/submission/124596600
 // ^^ więc no NTT needed even with modulos.
 
+// Also, atcoder implementation seems cool (but has internal dependencies):
+// https://github.com/atcoder/ac-library/blob/master/atcoder/convolution.hpp
+
 typedef complex<double> cd;
 const double PI = 4*atan(1.);
 

@@ -70,52 +70,41 @@ int main(){
     // Mobius function calc by default.
     func[1] = 1;
     FOR(i,2,N){
-        // without non-modulo opt:
-        /* if(!is_composite[i]) primes.push_back(i); */
-        /* for(int j = 0; j <= (int)primes.size() && i * primes[j] < N; ++j){ */
-        /*     /1* assert(!is_composite[i * primes[j]]); *1/ */
-        /*     is_composite[i * primes[j]] = 1; */
-        /*     if(i % primes[j] == 0) break; */
-        /* } */
         // without checking divisibility:
         if(!is_composite[i]){
+            wh_pr_ind[i] = primes.size();
             primes.push_back(i);
             func[i] = -1; cnt[i] = 1; // If wanna wyliczyć multiplicative function.
-            for(int j = 0; j < (int)primes.size() && i * primes[j] < N; ++j){
-                is_composite[i * primes[j]] = 1;
-                wh_pr_ind[i * primes[j]] = j;
-                // If wanna wyliczyć multiplicative function.
-                if(j + 1 == (int)primes.size()){
-                    /* func[i * primes[j]] = func[i] / cnt[i] * (cnt[i] + 1); */
-                    func[i * primes[j]] = 0;
-                    cnt[i * primes[j]] = cnt[i] + 1;
-                }
-                else{
-                    func[i * primes[j]] = func[i] * func[primes[j]];
-                    cnt[i * primes[j]] = 1;
-                }
-            }
         }
-        else{
-            for(int j = 0; j <= wh_pr_ind[i] && i * primes[j] < N; ++j){
-                is_composite[i * primes[j]] = 1;
-                wh_pr_ind[i * primes[j]] = j;
-                // If wanna wyliczyć multiplicative function.
-                if(j == wh_pr_ind[i]){
-                    /* func[i * primes[j]] = func[i] / cnt[i] * (cnt[i] + 1); */
-                    func[i * primes[j]] = 0;
-                    cnt[i * primes[j]] = cnt[i] + 1;
-                }
-                else{
-                    func[i * primes[j]] = func[i] * func[primes[j]];
-                    cnt[i * primes[j]] = 1;
-                }
+        for(int j = 0; j <= wh_pr_ind[i] && i * primes[j] < N; ++j){
+            is_composite[i * primes[j]] = 1;
+            wh_pr_ind[i * primes[j]] = j;
+            // If wanna wyliczyć multiplicative function.
+            if(j + 1 == wh_pr_ind[i]){
+                /* func[i * primes[j]] = func[i] / cnt[i] * (cnt[i] + 1); */
+                func[i * primes[j]] = 0;
+                cnt[i * primes[j]] = cnt[i] + 1;
+            }
+            else{
+                func[i * primes[j]] = func[i] * func[primes[j]];
+                cnt[i * primes[j]] = 1;
             }
         }
     }
+    auto gen_pr_facts = [&](int n){
+        vi res;
+        while(n != 1){
+            int cr = primes[wh_pr_ind[n]];
+            n /= cr;
+            if(res.empty() || res.back() != cr)
+                res.push_back(cr);
+        }
+        return res;
+    };
     whatis(primes.size())
     whatis(func[2])
     whatis(func[4])
     whatis(func[6])
+    whatis(gen_pr_facts(84))
 }
 
