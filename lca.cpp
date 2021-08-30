@@ -45,6 +45,11 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 vector<int> adj[1000];
 int anc[1000][11]; //log(n) values for each node (1 << i)
 int d[1000];
+// 240821, możesz też użyć tin, tout, for
+// bool is_ancestor(int u, int v)
+// {
+//     return tin[u] <= tin[v] && tout[u] >= tout[v];
+// }
 
 void pre(int cur, int prev){
     anc[cur][0] = prev;

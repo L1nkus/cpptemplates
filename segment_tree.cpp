@@ -1,4 +1,26 @@
-#include <bits/stdc++.h> //Stack size ~2'000'000(x4) use "int *arr = new int[n]" above that
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+#include <array>
+#include <queue>
+#include <deque>
+#include <set>
+#include <map>
+#include <stdlib.h>
+#include <ctime>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <iostream>
+#include <cctype>
+#include <cstring>
+#include <numeric>
+#include <bitset>
+#include <stack>
+#include <functional>
+#include <cassert>
+#include <tuple>
+#include <iomanip>
 #define pb push_back
 #define mp make_pair
 #define ll long long
@@ -31,25 +53,45 @@ template<typename T> inline void sc(T &num){bool neg=0;int c;num=0;while(c=getch
 inline void getstr(string &str){char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 
 const int N = 1e5+2; //Sometimes must be scaled into a power of 2!!!!!!!!!!!!!
-ll t[N*2];
-ll n;
 
-ll query(ll l, ll r){
-    ll res = 0;
-    for(l+=n, r+=n; l<r; l>>=1, r>>=1){
-        if(l&1)
-            res = max(res,t[l++]);
-            //res += t[l++];
-        if(r&1)
-            res = max(res,t[--r]);
-            //res += t[--r];
+// function, base val
+template<ll op(ll, ll), ll baseval>
+class seg{
+public:
+    ll t[N*2];
+    ll n;
+
+    ll query(ll l, ll r){
+        ll res = baseval;
+        for(l+=n, r+=n; l<r; l>>=1, r>>=1){
+            if(l&1)
+                res = op(res,t[l++]);
+                //res += t[l++];
+            if(r&1)
+                res = op(res,t[--r]);
+                //res += t[--r];
+        }
+        return res;
     }
-    return res;
-}
 
-void modify(ll p, ll val){
-    for(t[p += n] = val; p > 1; p>>=1)
-        t[p>>1] = max(t[p] , t[p^1]);
+    void modify(ll p, ll val){
+        for(t[p += n] = val; p > 1; p>>=1)
+            t[p>>1] = op(t[p] , t[p^1]);
+    }
+
+    template<typename T>
+    seg(T a, int n) : n(n) {
+        for(int i = 2*n-1; i >= n; --i)
+            t[i] = a[i - n];
+        for(int i = n - 1; i > 0; --i)
+            t[i] = op(t[i<<1] , t[i<<1|1]);
+    }
+};
+
+ll fun(ll a, ll b){
+    return max(a,b);
+    /* return min(a,b); */
+    /* return a + b; */
 }
 
 int main(){
@@ -57,20 +99,21 @@ int main(){
     string str;
     vector<int> vec{4,6,1,6,32,65,43,54,12,32,53,34,65,23,45,76,89,45,71,2,6,9,43,33,11,77,54,76};
     auto cur = vec.begin();
-    n = vec.size();
-    for(auto ct = t+n; ct < t+2*n; ++ct)
-        *ct = *cur++;
-    for(int i = n - 1; i > 0; --i)
-        t[i] = max(t[i*2] , t[i*2|1]);
+    seg<fun, -INF> t(vec, vec.size());
+    /* n = vec.size(); */
+    /* for(auto ct = t+n; ct < t+2*n; ++ct) */
+    /*     *ct = *cur++; */
+    /* for(int i = n - 1; i > 0; --i) */
+    /*     t[i] = max(t[i*2] , t[i*2|1]); */
     int qu;
     sc(qu);
     int l,r;
     while(qu--){
         sc(l);
         sc(r);
-        cout << query(l-1,r) << '\n';
-        modify(l-1,3);
-        cout << query(l-1,r) << '\n';
+        cout << t.query(l-1,r) << '\n';
+        t.modify(l-1,3);
+        cout << t.query(l-1,r) << '\n';
     }
 }
 
