@@ -39,28 +39,28 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 #define N 1000001
-int size[N];
+int sz[N];
 int link[N];
 
 inline int find(int a){
-    while(a != link[a]) a = link[a];
-    return a;
+    return a == link[a] ? a : link[a] = find(link[a]);
 }
 
-inline void unite(int a, int b){ //a and b are after find() //or not, whatever
+inline bool unite(int a, int b){ //a and b are after find() //or not, whatever
     a = find(a);
     b = find(b);
-    if(a == b) return;
-    if(size[a] < size[b]) swap(a,b);
-    size[a] += size[b];
+    if(a == b) return false;
+    if(sz[a] < sz[b]) swap(a,b);
+    sz[a] += sz[b];
     link[b] = a;
+    return true;
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     for(int i = 0; i < N; ++i){
         link[i] = i;
-        size[i] = 1;
+        sz[i] = 1;
     }
 }
 
