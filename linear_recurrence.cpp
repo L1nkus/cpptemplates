@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <algorithm>
 #include <vector>
+#include <array>
 #include <queue>
 #include <deque>
 #include <set>
@@ -30,7 +31,7 @@
 #define FORREV(x,plus,arr) for(auto x = (arr).rbegin()+(plus); x !=(arr).rend(); ++x)
 #define REE(s_) {cout<<s_<<'\n';exit(0);}
 #define GET(arr) for(auto &i: (arr)) sc(i)
-#define whatis(x) cerr << #x << " is " << x << endl;
+#define whatis(x) cerr << #x << " is " << (x) << endl;
 #define e1 first
 #define e2 second
 #define INF 0x7f7f7f7f
@@ -43,6 +44,9 @@ typedef uint64_t ull;
 #define uset unordered_set
 using namespace std;
 
+#ifdef ONLINE_JUDGE
+#define whatis(x) ;
+#endif
 #ifdef _WIN32
 #define getchar_unlocked() _getchar_nolock()
 #define _CRT_DISABLE_PERFCRIT_LOCKS
@@ -56,77 +60,105 @@ inline void getch(char &x){while(x = getchar_unlocked(), x < 33){;}}
 inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 #define N 1000001
-/* #define N 2000001 */
 
-inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
-    if(b == 1) return a;
-    if(b&1){
-        return (a+mulmod(a,b^1,mod))%mod;
-    }
-    return mulmod(a,b >> 1,mod)*2%mod;
+// Berlekamp-Massey algorithm.
+#define SZ 233333
+constexpr int MOD=1e9+7; //or any prime
+ll qp(ll a,ll b)
+{
+	ll x=1; a%=MOD;
+	while(b)
+	{
+		if(b&1) x=x*a%MOD;
+		a=a*a%MOD; b>>=1;
+	}
+	return x;
 }
-
-constexpr int64_t mod = 1000000007;
-inline int64_t fastpow(int64_t a, int64_t b){
-    if(b == 0)
-        return 1;
-    if(b&1){
-        return (a * fastpow(a,b^1)) % mod;
-    }
-    a = fastpow(a,b >> 1);
-    return (a*a)%mod;
+namespace linear_seq {
+inline vector<int> BM(vector<int> x)
+{
+	//ls: (shortest) relation sequence (after filling zeroes) so far
+	//cur: current relation sequence
+	vector<int> ls,cur;
+	//lf: the position of ls (t')
+	//ld: delta of ls (v')
+	int lf,ld;
+	for(int i=0;i<int(x.size());++i)
+	{
+		ll t=0;
+		//evaluate at position i
+		for(int j=0;j<int(cur.size());++j)
+			t=(t+x[i-j-1]*(ll)cur[j])%MOD;
+		if((t-x[i])%MOD==0) continue; //good so far
+		//first non-zero position
+		if(!cur.size())
+		{
+			cur.resize(i+1);
+			lf=i; ld=(t-x[i])%MOD;
+			continue;
+		}
+		//cur=cur-c/ld*(x[i]-t)
+		ll k=-(x[i]-t)*qp(ld,MOD-2)%MOD/*1/ld*/;
+		vector<int> c(i-lf-1); //add zeroes in front
+		c.pb(k);
+		for(int j=0;j<int(ls.size());++j)
+			c.pb(-ls[j]*k%MOD);
+		if(c.size()<cur.size()) c.resize(cur.size());
+		for(int j=0;j<int(cur.size());++j)
+			c[j]=(c[j]+cur[j])%MOD;
+		//if cur is better than ls, change ls to cur
+		if(i-lf+(int)ls.size()>=(int)cur.size())
+			ls=cur,lf=i,ld=(t-x[i])%MOD;
+		cur=c;
+	}
+	for(int i=0;i<int(cur.size());++i)
+		cur[i]=(cur[i]%MOD+MOD)%MOD;
+	return cur;
 }
-
-int gcdExtended(int a, int b, int *x, int *y){
-    if (a == 0){
-        *x = 0, *y = 1;
-        return b;
-    }
-    int x1, y1;
-    int gcd = gcdExtended(b%a, a, &x1, &y1);
-    *x = y1 - (b/a) * x1;
-    *y = x1;
-    return gcd;
+int m; //length of recurrence
+//a: first terms
+//h: relation
+ll a[SZ],h[SZ],t_[SZ],s[SZ],t[SZ];
+//calculate p*q mod f
+inline void mull(ll*p,ll*q)
+{
+	for(int i=0;i<m+m;++i) t_[i]=0;
+	for(int i=0;i<m;++i) if(p[i])
+		for(int j=0;j<m;++j)
+			t_[i+j]=(t_[i+j]+p[i]*q[j])%MOD;
+	for(int i=m+m-1;i>=m;--i) if(t_[i])
+		//miuns t_[i]x^{i-m}(x^m-\sum_{j=0}^{m-1} x^{m-j-1}h_j)
+		for(int j=m-1;~j;--j)
+			t_[i-j-1]=(t_[i-j-1]+t_[i]*h[j])%MOD;
+	for(int i=0;i<m;++i) p[i]=t_[i];
 }
-
-//dzielnik i modulo musza byc wzglednie pierwsze
-//jesli oba sa PIERWSZE, mozna tez uzyskac invb=fastpow(b,mod-2) % mod
-int modInverse(int a, int m) {
-    int x, y;
-    gcdExtended(a, m, &x, &y);
-    return (x%m + m) % m;
+inline ll calc(ll K)
+{
+	for(int i=m;~i;--i)
+		s[i]=t[i]=0;
+	//init
+	s[0]=1; if(m!=1) t[1]=1; else t[0]=h[0];
+	//binary-exponentiation
+	while(K)
+	{
+		if(K&1) mull(s,t);
+		mull(t,t); K>>=1;
+	}
+	ll su=0;
+	for(int i=0;i<m;++i) su=(su+s[i]*a[i])%MOD;
+	return (su%MOD+MOD)%MOD;
 }
-
-ll fac[N];
-ll facinv[N];
-
-// constexpr btw?
-void pre(){
-    fac[0] = 1;
-    FOR(i,1,N)
-        fac[i] = fac[i - 1] * i % mod;
-#if N == 1000001
-    if constexpr (mod == 1000000007)
-        facinv[N - 1] = 397802501;
-    else
-        facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
-#else
-    facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
-#endif
-    for(int i = N - 2; i >= 0; --i)
-        facinv[i] = facinv[i + 1] * (i + 1) % mod;
-    // Also i^-1 = facinv[i] * fac[i - 1] (i in 1..n)
-    // Similary idea can be used to get invs of any n numbers in O(n + logp).
-    // -> zamiast *1, *2, *3... do *a[0], *a[1], *a[2]...
+inline int work(vector<int> x,ll n)
+{
+	if(n<int(x.size())) return x[n];
+	vector<int> v=BM(x); m=v.size(); if(!m) return 0;
+	for(int i=0;i<m;++i) h[i]=v[i],a[i]=x[i];
+	return calc(n);
+}
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    pre();
-    /* whatis(facinv[N - 1]) */
-    int a = 5, b = 2;
-    int invb = modInverse(b,mod);
-    int adivbmodmod = a*invb%mod;
-    cout << adivbmodmod << '\n';
+	cout << linear_seq::work({1,1,2,3,5,8,13,21}, 10) << '\n';
 }
 

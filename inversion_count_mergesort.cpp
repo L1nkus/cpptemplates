@@ -41,16 +41,16 @@ template<typename T> inline T mod(T i, T n) { return (i % n + n) % n; }
 
 ll ans;
 
-inline void merge_sort(pair<char,int> *beg, pair<char,int> *end){
+inline void merge_sort(pair<int,int> *beg, pair<int,int> *end){
     if(beg + 1 == end) return;
     int32_t allsize = end-beg;
     int32_t size1 = allsize >> 1;
     int32_t size2 = size1 + (allsize&1);
-    pair<char,int> *middle = beg+size1;
+    pair<int,int> *middle = beg+size1;
     merge_sort(beg,middle);
     merge_sort(middle,end);
-    pair<char,int> vec1[size1];
-    pair<char,int> vec2[size2];
+    pair<int,int> vec1[size1];
+    pair<int,int> vec2[size2];
     copy_n(beg,size1,vec1);
     copy_n(middle,size2,vec2);
     auto it1 = vec1;
@@ -82,11 +82,11 @@ int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int n;
     sc(n);
-    char arr1[n];
+    int arr1[n];
     FORR(i,arr1)
         i = getchar_unlocked();
-    getchar_unlocked();
-    pair<char,int> arr2[n];
+    getint_unlocked();
+    pair<int,int> arr2[n];
     FORR(i,arr2){
         i.e1 = getchar_unlocked();
     }

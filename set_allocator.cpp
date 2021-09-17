@@ -1,4 +1,5 @@
 /* #pragma GCC optimize("O3") */
+#include <random>
 #include <stdio.h>
 #include <algorithm>
 #include <vector>
@@ -35,7 +36,6 @@
 #define whatis(x) cerr << #x << " is " << (x) << endl;
 #define e1 first
 #define e2 second
-#define INF 0x7f7f7f7f
 typedef std::pair<int,int> pi;
 typedef std::vector<int> vi;
 typedef std::vector<std::string> vs;
@@ -61,6 +61,54 @@ inline void getch(char &x){while(x = getchar_unlocked(), x < 33){;}}
 inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 #define N 1000001
+
+namespace btree {
+    #include <x86intrin.h>
+    typedef __m256i reg;
+
+    const int n = (1<<20), B = 16;
+    const int nblocks = (n + B - 1) / B;
+    const int INF = numeric_limits<int>::max();
+
+    alignas(64) int btree[nblocks][B];
+
+    int go(int k, int i) { return k * (B + 1) + i + 1; }
+
+    void build(int k = 0) {
+        static int t = 0;
+        if (k < nblocks) {
+            for (int i = 0; i < B; i++) {
+                build(go(k, i));
+                btree[k][i] = (t < n ? a[t++] : INF);
+            }
+            build(go(k, B));
+        }
+    }
+
+    // what of insert, erase?
+
+    int cmp(reg x_vec, int* y_ptr) {
+        reg y_vec = _mm256_load_si256((reg*) y_ptr);
+        reg mask = _mm256_cmpgt_epi32(x_vec, y_vec);
+        return _mm256_movemask_ps((__m256) mask);
+    }
+
+    int search(int x) {
+        int k = 0, res = INF;
+        reg x_vec = _mm256_set1_epi32(x);
+        while (k < nblocks) {
+            int mask = ~(
+                cmp(x_vec, &btree[k][0]) +
+                (cmp(x_vec, &btree[k][8]) << 8)
+            );
+            int i = __builtin_ffs(mask) - 1;
+            if (i < B)
+                res = btree[k][i];
+            k = go(k, i);
+        }
+        return res;
+    }
+}
 
 // static all try.
 // inline btw?
@@ -101,8 +149,8 @@ public:
         /* return (T *) new char[n * sizeof(T)]; */
         /* return (T *) malloc(n * sizeof(T)); */
         // ^^ -> basically as fast as std::set in the 2nd case (malloc troche slower vs new).
-        /* it += n * sizeof(T); */
-        /* return (T *)&arr[it - n * sizeof(T)]; */
+        it += n * sizeof(T);
+        return (T *)&arr[it - n * sizeof(T)];
     }
     static void deallocate(T *, std::size_t) noexcept {
     }
@@ -117,6 +165,28 @@ public:
     // ^^b4 fixing bug, after fixing bug, 0.26 consistently.
     // -> if have the mem, seems pretty worthwhile.
     // 0.266 with empty dealloc, but consistently without spikes.
+};
+
+#define blocksz 1 << 7
+template<typename T>
+class cacheeff_alloc_block {
+    int it = blocksz;
+    char *block;
+public:
+    typedef T value_type;
+    cacheeff_alloc_block() {
+        static_assert(sizeof(T) <= blocksz, "Too small blocksz.");
+    }
+    T *allocate(std::size_t n) {
+        it += n * sizeof(T);
+        if(it > blocksz){
+            block = new char[blocksz];
+            it = n * sizeof(T);
+        }
+        return (T *)&block[it - n * sizeof(T)];
+    }
+    static void deallocate(T *, std::size_t) noexcept {
+    }
 };
 
 int main(){
@@ -141,9 +211,10 @@ int main(){
     /*     } */
     /* } */
     {
-        std::set<int, std::less<int>, cacheeff_alloc<int>> st1;
+        /* std::set<int, std::less<int>, cacheeff_alloc<int>> st1; */
         // 0.17
         /* std::set<int> st1; */
+        std::set<int, std::less<int>, cacheeff_alloc_block<int>> st1;
         /* std::set<int, std::less<int>, bestAlloc<int>> st1; // worse than mine o eps xd. */
         // 0.17 also, hmm.
         /* FOR(i,0,10000){ */
@@ -166,9 +237,17 @@ int main(){
         }
         // insert time similar at 0.33s
         // but yeah, counts somehow worse than original, not what I expected xd.
+        static int a[1000000];
+        iota(a,a+1000000,0);
+        std::random_device rd;
+        std::mt19937 g(rd());
+        shuffle(a,a+1000000,g);
         FOR(x,0,10){
             /* std::set<int> st1; */
-            FOR(i,0,1000000){
+            /* FOR(i,0,1000000){ */
+            FORR(i,a){ // 7.5s cacheoff -O2 ; 4.4s normal -O2.
+                // block 1024 6.247s. ; block 1 << 26 7.5s
+                // 1 << 5 4.5s
                 res += st1.count(i);
             }
         }
