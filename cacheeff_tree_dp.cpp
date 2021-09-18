@@ -1,3 +1,5 @@
+#pragma GCC optimize("Ofast,unroll-loops")
+#pragma GCC target("avx2,popcnt")
 #include <stdio.h>
 #include <algorithm>
 #include <vector>
@@ -66,6 +68,8 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 // Then, calculating the dp bottom up in reverse bfs order.
 // Furthermore, also cache-efficiently traversing the adjacency list.
 // https://csacademy.com/contest/archive/task/growing-trees/statistics/
+// This is not nearly as op as the hld based query path traversing, can't
+// solve 1e10 under 2d with this, but 1e9 might be worth a try.
 
 ll dpsub[N];
 ll mxdp;
@@ -91,12 +95,13 @@ void d5(int v){
     /* for(int ii = adjrng[v].first; ii <= adjrng[v].second; ++ii){ */
     for(int ii = adjrng[v].second; ii >= adjrng[v].first; --ii){
         const auto &i = adj2[ii];
-        if(i.oth == pr[v])
-            continue;
+        /* if(i.oth == pr[v]) */
+        /*     continue; */
         ll sth = dpsub[i.oth] + edgval(i);
         mxdp = max(mxdp, premx + sth);
         premx = max(premx, sth);
     }
+    // Cool do have as little distinct arrays as possible obviously.
     dpsub[v] = premx;
 }
 
@@ -124,10 +129,18 @@ void relabel(){
     for(int i = 0; i < it; ++i){
         adjrng[i].first = it2;
         for(auto &x: adj[bfs_to_orig_ord[i]]){
-            adj2[it2++] = std::move(x);
+            if(x.oth != pr[i]){
+                adj2[it2++] = std::move(x);
+            }
         }
         adjrng[i].second = it2 - 1;
     }
+    /* int nwt[it]; */
+    /* FOR(i,0,it){ */
+    /*     nwt[i] = t[bfs_to_orig_ord[i]]; */
+    /* } */
+    /* memcpy(t, nwt, sizeof nwt); */
+
 }
 
 int32_t main(){
