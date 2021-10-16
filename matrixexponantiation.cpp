@@ -1,6 +1,7 @@
-/* #pragma GCC optimize("Ofast") */
-/* #pragma GCC target("avx2") */
+#pragma GCC optimize("Ofast")
+#pragma GCC target("avx2,fma")
 #include <bits/stdc++.h>
+#include <x86intrin.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 #define pb push_back
@@ -42,6 +43,43 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
+
+const int u = 48; // all block coordinates must be a multiple of lcm(6, 16) = 48
+
+const int n = 20 * u; // = 1920 (also try 240, 480, 960)
+alignas(64) float a[n * n], b[n * n], c[n * n];
+
+const int B = 8;
+typedef float vec __attribute__ (( vector_size(4 * B) ));
+
+// "100x faster than for loops" (but compared against i,j,k order)
+// https://gist.github.com/sslotin/fae39ea49a812732ae45db7b72f6a7ff
+// 6x16 micro-kernel
+void kernel(int x, int y, int l, int r) {
+    vec t[6][2] = {0};
+
+    for (int k = l; k < r; k++)
+        for (int i = 0; i < 6; i++)
+            for (int j = 0; j < 2; j++)
+                t[i][j] += (vec{} + a[x * n + i * n + k]) * ((vec*) b)[n / 8 * k + y / 8 + j];
+
+    for (int i = 0; i < 6; i++)
+        for (int j = 0; j < 2; j++)
+            ((vec*) c)[x * n / 8 + i * n / 8 + y / 8 + j] += t[i][j];
+}
+
+void matmul() {
+    const int s3 = 2 * u;
+    const int s2 = 4 * u;
+    const int s1 = 8 * u;
+    
+    for (int i3 = 0; i3 < n; i3 += s3)
+        for (int i2 = 0; i2 < n; i2 += s2)
+            for (int i1 = 0; i1 < n; i1 += s1)
+                for (int x = i2; x < std::min(i2 + s2, n); x += 6)
+                    for (int y = i3; y < std::min(i3 + s3, n); y += 16)
+                        kernel(x, y, i1, std::min(i1 + s1, n));
+}
 
 constexpr ll m = 101;
 ll mat[101][101];
