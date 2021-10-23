@@ -37,78 +37,81 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+/* #define N 1000001 */
+#define N 8000001
+// 200,000 * 30
 
-#define N 100001
-vector<int> dz[N];
+int t[N]; // number of passing through node
+int ind[N];
+int adj[N][2];
+int it;
 
-struct node{
-    int mn = 0x7f7f7f7f;
-    node *nxt[2];
-    /* node(){ */
-    /*     nxt[0] = nxt[1] = nullptr; */
-    /* } */
-};
-
-node tr[N];
-bool was[N];
-
-inline void add(int n, int c){
-    node *x = &tr[n];
-    x->mn = min(x->mn, c);
-    for(int i = 18; i > 0; --i){
-        bool wh = c & (1 << (i-1));
-        if(x->nxt[wh] == nullptr){
-            x->nxt[wh] = new node();
-        }
-        x = x->nxt[wh];
-        x->mn = min(x->mn, c);
+void add(int v, int num, int bit, int crind){
+    ++t[v];
+    if(bit == -1){
+        ind[v] = crind;
+        return;
     }
+    int nxb = bool(num & (1 << bit));
+    if(!adj[v][nxb]){
+        adj[v][nxb] = ++it;
+    }
+    add(adj[v][nxb], num, bit - 1, crind);
 }
 
-inline int qu(int n, int w, int s){
-    int ret = 0;
-    node *x = &tr[n];
-    if(x->nxt[0] == nullptr && x->nxt[1] == nullptr) return -1;
-    if(x->mn > s) return -1;
-    for(int i = 18; i > 0; --i){
-        bool wh = (w & (1 << (i-1)));
-        wh ^= 1;
-        if(x->nxt[wh] && x->nxt[wh]->mn <= s){
-            ;
-        }
-        else{
-            wh ^= 1;
-        }
-        ret += wh << (i-1);
-        x = x->nxt[wh];
+void rem(int v, int num, int bit){
+    --t[v];
+    if(bit == -1)
+        return;
+    int nxb = bool(num & (1 << bit));
+    if(!adj[v][nxb]){
+        assert(0);
     }
-    return ret;
+    rem(adj[v][nxb], num, bit - 1);
+}
+
+int trav(int v, int num, int bit){
+    if(bit == -1){
+        assert(t[v]);
+        return ind[v];
+    }
+    int nxb = bool(num & (1 << bit));
+    int _nxv = nxb;
+    if(!adj[v][_nxv] || !t[adj[v][_nxv]]){
+        _nxv ^= 1;
+    }
+    if(!adj[v][_nxv] || !t[adj[v][_nxv]]){
+        assert(0);
+    }
+    return trav(adj[v][_nxv], num, bit - 1);
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    for(int i = 1; i < N; ++i){
-        for(int x = i; x < N; x += i){
-            dz[x].push_back(i);
-        }
+    int n;
+    sc(n);
+    int a[n];
+    GET(a);
+    int it = 0;
+    FORR(i,a){
+        add(0, i, 30, it++);
     }
-    int q,t,x,k,s;
-    sc(q);
-    while(q--){
-        sc(t);
-        if(t == 1){
-            sc(x);
-            if(was[x]) continue;
-            was[x] = 1;
-            FORR(i,dz[x]){
-                add(i,x);
-            }
-        }
-        else{
-            sc(x,k,s);
-            if(x%k){cout << "-1\n"; continue;}
-            cout << qu(k,x,s-x) << '\n';
-        }
+    it = 0;
+    set<pi> st;
+    int res = 0;
+    FORR(i,a){
+        rem(0, i, 30);
+        int wh = trav(0, i, 30);
+        assert(wh != it);
+        /* whatis(wh) */
+        /* whatis(it) */
+        pi x = {wh, it};
+        if(x.e1 > x.e2)
+            swap(x.e1, x.e2);
+        res += !st.insert(x).second;
+        /* ++it; */
+        // forgot to readd.
+        add(0, i, 30, it++);
     }
+    cout << --res << '\n';
 }
-

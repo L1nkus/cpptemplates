@@ -73,6 +73,7 @@ int main(){
     /*     ++i; */
     /* } */
     const long long B = 3007000499;
+    // 113 cool also.
     vi can = {299,293,283,307};
     /* vi can = {31}; */
     const long long A = can[rand()%can.size()];
@@ -92,7 +93,8 @@ int main(){
         p[i] = (p[i-1]*A)%B;
     }
     auto hs = [&](int l, int r){
-        return ((h[r] - (l ? mul(h[l-1],p[r-l+1],B) : 0)) % B + B) % B;
+        /* return ((h[r] - (l ? mul(h[l-1],p[r-l+1],B) : 0)) % B + B) % B; */
+        return ((h[r] - (l ? h[l-1] * p[r-l+1] : 0)) % B + B) % B;
     };
     int sz = s.size()-pat.size()+1;
     FOR(i,0,sz){
