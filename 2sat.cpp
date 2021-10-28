@@ -102,6 +102,9 @@ int main(){
         assign[i / 2] = comp[i] > comp[i + 1];
         // XXX assign == 0 -> 2 * i + 1, nie 2 * i z tym. Might wanna flip this (2nd trening drużynowy 2021).
         /* assign[i / 2] = comp[i] < comp[i + 1]; */
+        // Jak mam wybór jednego z dwóch w obrębie jednego iksa, i chcę wymusić
+        // wybór jednego, bo np. inny jest pusty, albo jest <= 2 czegoś, dodaj
+        // i * 2 + 1, i * 2.
     }
 }
 
