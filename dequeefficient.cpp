@@ -1,6 +1,10 @@
+/* #pragma GCC optimize("O3,unroll-loops") */
+/* #pragma GCC optimize("Ofast,unroll-loops") */
+/* #pragma GCC target("avx2,popcnt") */
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
+#include <type_traits>
 #define pb push_back
 #define mp make_pair
 #define all(a) begin(a),end(a)
@@ -24,15 +28,18 @@ typedef uint64_t ull;
 #define uset unordered_set
 using namespace std;
 using namespace __gnu_pbds;
-
+ 
+#ifdef ONLINE_JUDGE
+#define whatis(x) ;
+#endif
 #ifdef _WIN32
 #define getchar_unlocked() _getchar_nolock()
 #define _CRT_DISABLE_PERFCRIT_LOCKS
 #endif
+template<class L, class R> ostream& operator<<(ostream &os, pair<L, R> P) { os<<"("<<P.first<<","<<P.second<<")"; return os; }
 template<class L, class R> ostream& operator<<(ostream &os, map<L, R> P) { for(auto const &vv: P)os<<"("<<vv.first<<","<<vv.second<<")"; return os; }
 template<class T> ostream& operator<<(ostream &os, set<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class T> ostream& operator<<(ostream &os, vector<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
-template<class L, class R> ostream& operator<<(ostream &os, pair<L, R> P) { os<<"("<<P.first<<","<<P.second<<")"; return os; }
 inline int fstoi(const string &str){auto it=str.begin();bool neg=0;int num=0;if(*it=='-')neg=1;else num=*it-'0';++it;while(it<str.end()) num=num*10+(*it++-'0');if(neg)num*=-1;return num;}
 inline void getch(char &x){while(x = getchar_unlocked(), x < 33){;}}
 inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked(),cur<33){;}while(cur>32){str+=cur;cur=getchar_unlocked();}}
@@ -41,67 +48,69 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-vector<int> adj[N], adjrev[N];
-bool vis[N];
-int comp[N];
-bool assign[N];
-vector<int> order;
-int it;
-
-void d1(int v){
-    vis[v] = 1;
-    for(auto &i: adj[v]){
-        if(!vis[i])
-            d1(i);
+// sz 0 -> unknown at compile time, dynamically allocated based on constructor.
+template<typename T, size_t sz = 1000000, bool push_front_only = true, bool push_back_only = false>
+struct fastdeque {
+    T _a[sz];
+    T *a = _a;
+    /* template<std::enable_if_t<sz, int> = -1> */
+    /* fastdeque(size_t dyn_sz) { */
+    /*     a = new T[dyn_sz]; */
+    /* } */
+    /* template<std::enable_if_t<sz, int> = -1> */
+    /* fastdeque() = delete; */
+    int initpos = push_front_only ? sz : push_back_only ? 0 : sz >> 1;
+    /* T *l = a + initpos, *r = a + initpos; */
+    int l = initpos, r = initpos;
+    void resize(size_t dyn_sz) {
+        static_assert(sz == 0, "resize on nonzero init size");
+        a = new T[dyn_sz];
+        l = r = initpos = push_front_only ? dyn_sz : push_back_only ? 0 : dyn_sz >> 1;
     }
-    order.push_back(v);
-}
-
-void d2(int v){
-    comp[v] = it;
-    for(auto &i: adjrev[v]){
-        if(comp[i] == -1)
-            d2(i);
+    /* template<std::enable_if_t<push_front_only, bool> = false> */
+    void push_back(const T& value) {
+        static_assert(!push_front_only, "push_back on push_front_only");
+        a[r++] = value;
     }
-}
-
+    void pop_back() {
+        --r;
+    }
+    /* template<std::enable_if_t<push_back_only, bool> = false> */
+    void push_front(const T& value) {
+        static_assert(!push_back_only, "push_front on push_back_only");
+        a[--l] = value;
+    }
+    void pop_front() {
+        ++l;
+    }
+    T &front() {
+        return a[l];
+    }
+    T &back() {
+        return a[r - 1];
+    }
+    T *begin() {
+        return &a[l];
+    }
+    T *end() {
+        return &a[r];
+    }
+    ssize_t size() {
+        return r - l;
+    }
+    bool empty() {
+        return l == r;
+    }
+    void clear() {
+        /* r = l = initpos; */
+        r = l = (r + l) >> 1;
+    }
+    T &operator [](size_t pos) {
+        return a[l + pos];
+    }
+};
+ 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    // make sure than 2 * (x) is in brackets
-    int n;
-    // (x or y) -> (~x -> y) and (~y -> x)
-    for(int i = 0; i < n; ++i){
-        for(auto &x: adj[i]){
-            adjrev[x].push_back(i);
-            // Zwolnienie pamięci jeśli trzeba
-            /* adj[i].clear(); */
-            /* adj[i].shrink_to_fit(); */
-        }
-    }
-    for(int i = 0; i < n; ++i){
-        if(!vis[i])
-            d1(i);
-    }
-    memset(comp,-1,n << 2);
-    for(int i = 0; i < n; ++i){
-        int v = order[n - i - 1];
-        if(comp[v] == -1){
-            d2(v);
-            ++it;
-        }
-    }
-    bool kk = 1;
-    for(int i = 0; i < n; i += 2){
-        //i -> x
-        //i+1 -> ~x
-        if(comp[i] == comp[i + 1]){
-            kk = 0;
-            break;
-        }
-        // component x przed componentem ~x w topo <-> x true
-        assign[i / 2] = comp[i] > comp[i + 1];
-        // XXX assign == 0 -> 2 * i + 1, nie 2 * i z tym. Might wanna flip this (2nd trening drużynowy 2021).
-        /* assign[i / 2] = comp[i] < comp[i + 1]; */
-    }
 }
 
