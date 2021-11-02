@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+// perf dif?
+#undef _GLIBCXX_DEBUG
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 #define pb push_back
@@ -42,69 +44,21 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define N 1000001
 
-// in other words, binary gaussian elimination
+mt19937_64 rng(time(0));
 
-// od last bita i potem xorowanie vectora jak crres nie ma danego bita -> max
-// xor of elements of some subset
-
-const int LOG_A = 20;
-
-int basis[LOG_A];
-int sz;
-
-void insertvec(int mask){
-	/* for(int i = 0; i < LOG_A; i++){ */
-	for(int i = LOG_A - 1; i >= 0; --i){
-		if((mask & 1 << i) == 0)
-            continue;
-
-		if(!basis[i]){
-			basis[i] = mask;
-			++sz;
-			return;
-		}
-
-        mask ^= basis[i];
-	}
-}
-
-int getminxored(int num){
-	/* for(int i = 0; i < LOG_A; i++){ */
-	for(int i = LOG_A - 1; i >= 0; --i){
-		if((num & 1 << i) == 0)
-            continue;
-
-		/* if(!basis[i]){ */
-		/* 	basis[i] = mask; */
-		/* 	++sz; */
-		/* 	return; */
-		/* } */
-
-        // jak 0 to cokolwiek
-        num ^= basis[i];
-	}
-    return num;
-}
+struct chash {
+    const uint64_t C = ll(2e18 * M_PI) + 96;
+    const int RANDOM = rng();
+    size_t operator()(uint64_t x) const {
+        return __builtin_bswap64((x^RANDOM) * C);
+    }
+};
+template<class L, class R>
+using hash_map = gp_hash_table<L, R, chash>;
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-	int n;
-	/* cin >> n; */
-	/* while(n--){ */
-	/* 	int cr; */
-        /* cin >> cr; */
-	/* 	insertvec(cr); */
-	/* } */
-	/* cout << (1 << sz) << endl; */
-    insertvec(27);
-    insertvec(32);
-    insertvec(44);
-    insertvec(57);
-    vi ns = {3,7,59,37};
-    FORR(i,ns){
-        whatis(i)
-        whatis(getminxored(i))
-    }
 }
 

@@ -42,69 +42,98 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define N 1000001
 
-// in other words, binary gaussian elimination
+struct fraction {
+    int64_t licz, mian;
+    fraction() = default;
+    fraction(int64_t licz, int64_t mian) : licz(licz), mian(mian) {normalize();}
+    void normalize() {
+        int64_t gc = __gcd(abs(licz), abs(mian));
+        licz /= gc;
+        mian /= gc;
+        if (mian < 0) {
+            licz *= -1;
+            mian *= -1;
+        }
+    }
+    fraction operator*=(const fraction &other) {
+        licz *= other.licz;
+        mian *= other.mian;
+        normalize();
+        return *this;
+    }
+    fraction operator/=(const fraction &other) {
+        licz *= other.mian;
+        mian *= other.licz;
+        normalize();
+        return *this;
+    }
+    fraction operator+=(const fraction &other) {
+        licz *= other.mian;
+        licz += mian * other.licz;
+        mian *= other.mian;
+        normalize();
+        return *this;
+    }
+    fraction operator-=(const fraction &other) {
+        licz *= other.mian;
+        licz -= mian * other.licz;
+        mian *= other.mian;
+        normalize();
+        return *this;
+    }
+    fraction operator*(const fraction &other) const {
+        return fraction(*this) *= other;
+    }
+    fraction operator/(const fraction &other) const {
+        return fraction(*this) /= other;
+    }
+    fraction operator+(const fraction &other) const {
+        return fraction(*this) += other;
+    }
+    fraction operator-(const fraction &other) const {
+        return fraction(*this) -= other;
+    }
+    fraction operator-() const {
+        fraction nwfrac = fraction(*this);
+        nwfrac.licz *= -1;
+        return nwfrac;
+    }
+    bool operator==(const fraction &other) const {
+        return licz == other.licz && mian == other.mian;
+    }
+    bool operator!=(const fraction &other) const {
+        return !(*this == other);
+    }
+};
 
-// od last bita i potem xorowanie vectora jak crres nie ma danego bita -> max
-// xor of elements of some subset
-
-const int LOG_A = 20;
-
-int basis[LOG_A];
-int sz;
-
-void insertvec(int mask){
-	/* for(int i = 0; i < LOG_A; i++){ */
-	for(int i = LOG_A - 1; i >= 0; --i){
-		if((mask & 1 << i) == 0)
-            continue;
-
-		if(!basis[i]){
-			basis[i] = mask;
-			++sz;
-			return;
-		}
-
-        mask ^= basis[i];
-	}
+istream &operator>>(istream &is, fraction &f) {
+    string tmp;
+    is >> tmp;
+    size_t dv = tmp.find('/');
+    if (dv == tmp.npos) {
+        f = fraction(stoll(tmp), 1);
+    }
+    else {
+        f = fraction(stoll(tmp.substr(0, dv)), stoll(tmp.substr(dv + 1)));
+    }
+    return is;
 }
 
-int getminxored(int num){
-	/* for(int i = 0; i < LOG_A; i++){ */
-	for(int i = LOG_A - 1; i >= 0; --i){
-		if((num & 1 << i) == 0)
-            continue;
-
-		/* if(!basis[i]){ */
-		/* 	basis[i] = mask; */
-		/* 	++sz; */
-		/* 	return; */
-		/* } */
-
-        // jak 0 to cokolwiek
-        num ^= basis[i];
-	}
-    return num;
+ostream &operator<<(ostream &os, const fraction &f) {
+    os << f.licz;
+    if (f.mian != 1) {
+        os << '/' << f.mian;
+    }
+    return os;
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-	int n;
-	/* cin >> n; */
-	/* while(n--){ */
-	/* 	int cr; */
-        /* cin >> cr; */
-	/* 	insertvec(cr); */
-	/* } */
-	/* cout << (1 << sz) << endl; */
-    insertvec(27);
-    insertvec(32);
-    insertvec(44);
-    insertvec(57);
-    vi ns = {3,7,59,37};
-    FORR(i,ns){
-        whatis(i)
-        whatis(getminxored(i))
-    }
+    fraction f;
+    cin >> f;
+    whatis(f.licz)
+    whatis(f.mian)
 }
 
