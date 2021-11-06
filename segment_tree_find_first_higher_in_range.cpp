@@ -42,69 +42,47 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+#define N 1000001
 
-// in other words, binary gaussian elimination
+int t2[N << 2];
+int n;
 
-// od last bita i potem xorowanie vectora jak crres nie ma danego bita -> max
-// xor of elements of some subset
-
-const int LOG_A = 20;
-
-int basis[LOG_A];
-int sz;
-
-void insertvec(int mask){
-	/* for(int i = 0; i < LOG_A; i++){ */
-	for(int i = LOG_A - 1; i >= 0; --i){
-		if((mask & 1 << i) == 0)
-            continue;
-
-		if(!basis[i]){
-			basis[i] = mask;
-			++sz;
-			return;
-		}
-
-        mask ^= basis[i];
-	}
+void build2(int v, int tl, int tr, int arr[]){
+    if(tl == tr){
+        t2[v] = arr[tl];
+        return;
+    }
+    int tm = (tl+tr)>>1;
+    build2(v<<1,tl,tm,arr);
+    build2(v<<1|1,tm+1,tr,arr);
+    t2[v] = max(t2[v<<1], t2[v<<1|1]);
 }
 
-int getminxored(int num){
-	/* for(int i = 0; i < LOG_A; i++){ */
-	for(int i = LOG_A - 1; i >= 0; --i){
-		if((num & 1 << i) == 0)
-            continue;
+// index of first elem > x on [l,r]; -1 if no such elem
+int find_f(int v, int lv, int rv, int l, int r, int x) {
+    if(lv > r || rv < l) return -1;
+    if(l <= lv && rv <= r) {
+        if(t2[v] <= x) return -1;
+        while(lv != rv) {
+            int mid = lv + ((rv-lv) >> 1);
+            if(t2[v << 1] > x) {
+                v = v<<1;
+                rv = mid;
+            }else {
+                v = v<<1|1;
+                lv = mid+1;
+            }
+        }
+        return lv;
+    }
 
-		/* if(!basis[i]){ */
-		/* 	basis[i] = mask; */
-		/* 	++sz; */
-		/* 	return; */
-		/* } */
-
-        // jak 0 to cokolwiek
-        num ^= basis[i];
-	}
-    return num;
+    int mid = lv + ((rv-lv)>>1);
+    int rs = find_f(v<<1, lv, mid, l, r, x);
+    if(rs != -1) return rs;
+    return find_f(v<<1|1, mid+1, rv, l ,r, x);
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-	int n;
-	/* cin >> n; */
-	/* while(n--){ */
-	/* 	int cr; */
-        /* cin >> cr; */
-	/* 	insertvec(cr); */
-	/* } */
-	/* cout << (1 << sz) << endl; */
-    insertvec(27);
-    insertvec(32);
-    insertvec(44);
-    insertvec(57);
-    vi ns = {3,7,59,37};
-    FORR(i,ns){
-        whatis(i)
-        whatis(getminxored(i))
-    }
 }
 
