@@ -45,34 +45,43 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 // Radewoosh ma ciekawe z jakimiś anti-precision error tricks:
 // https://codeforces.com/contest/1548/submission/124596600
 // ^^ więc no NTT needed even with modulos.
-// also, tnowak's:
-#define LL ll
-#define REP(i, n) FOR(i, 0, n)
-#define size(x) int((x).size())
-vector<LL> conv_mod(vector<LL> &a, vector<LL> &b, int M) {
-if(a.empty() || b.empty()) return {};
-vector<LL> res(size(a) + size(b) - 1);
-int B = 32 - __builtin_clz(size(res)), n = 1 << B;
-int cut = int(sqrt(M));
-vector<Complex> L(n), R(n), outl(n), outs(n);
-REP(i, size(a)) L[i] = Complex((int) a[i] / cut, (int) a[i] %
-cut);
-REP(i, size(b)) R[i] = Complex((int) b[i] / cut, (int) b[i] %
-cut);
-fft(L), fft(R);
-REP(i, n) {
-int j = -i & (n - 1);
-outl[j] = (L[i] + conj(L[j])) * R[i] / (2.0 * n);
-outs[j] = (L[i] - conj(L[j])) * R[i] / (2.0 * n) / 1i;
+
+// new tnowak's.
+using C = complex<double>;
+void fft(vector<C>& a) {
+    int n = a.size(), L = 31 - __builtin_clz(n);
+    static vector<C> R(2, 1);
+    static vector<C> rt(2, 1);  // (^ 10% faster if double)
+    for (static int k = 2; k < n; k *= 2) {
+        R.resize(n), rt.resize(n);
+        auto x = polar(1.0, acos(-1.0) / k);
+        FOR(i, k, 2 * k - 1) rt[i] = R[i] = i & 1 ? R[i >> 1] * x : R[i >> 1];
+    } 
+    vector<int> rev(n);
+    FOR(i, 0, n) rev[i] = (rev[i >> 1] | (i & 1) << L) >> 1;
+    FOR(i, 0, n) if (i < rev[i]) swap(a[i], a[rev[i]]);
+    for (int k = 1; k < n; k *= 2) for (int i = 0; i < n; i += 2 * k) FOR(j, 0, k) {
+        auto x = (double*)&rt[j + k], y = (double*)&a[i + j + k];
+        C z(x[0] * y[0] - x[1] * y[1], x[0] * y[1] + x[1] * y[0]);
+        a[i + j + k] = a[i + j] - z, a[i + j] += z;
+    }
 }
-fft(outl), fft(outs);
-REP(i, size(res)) {
-LL av = LL(real(outl[i]) + 0.5), cv = LL(imag(outs[i]) +
-0.5);
-LL bv = LL(imag(outl[i]) + 0.5) + LL(real(outs[i]) + 0.5);
-res[i] = ((av % M * cut + bv) % M * cut + cv) % M;
-}
-return res;
+ 
+#define ssize(x) int(x.size())
+vector<ll> conv(vector<ll> a, vector<ll> b) {
+	if (a.empty() || b.empty()) return {};
+	vector<ll> res(ssize(a) + ssize(b) - 1);
+	int L = 32 - __builtin_clz(ssize(res)), n = (1 << L);
+	vector<C> in(n), out(n);
+	FOR(i, 0, ssize(a)) in[i].real(a[i]);
+	// copy(a.begin(), a.end(), in.begin());
+	FOR(i, 0, ssize(b)) in[i].imag(b[i]);
+	fft(in);
+	for (auto &x : in) x *= x;
+	FOR(i, 0, n) out[i] = in[-i & (n - 1)] - conj(in[i]);
+	fft(out);
+	FOR(i, 0, ssize(res)) res[i] = imag(out[i]) / (4 * n) + 0.5;
+	return res;
 }
 
 // Also, atcoder implementation seems cool (but has internal dependencies):

@@ -86,6 +86,27 @@ ll mat[101][101];
 ll jmat[101][101];
 // mat equal to jmat at beginning (1st degree)
 
+// Algorytm	ijk	    ikj	    bikj(16)	bikj(32)	DGEMM	ATLAS DGEMM
+// Czas (s)	320.49	24.28	8.68    	30.45	    25.72	2.58
+// Mflop/s	10.06	132.67	371.11  	105.79	    125.24	1248.53
+
+void numertkimul(){
+    ll nmat[101][101];
+    memset(nmat,0,sizeof nmat);
+    /* bikj(16) */
+    for (int i = 0; i < m; i+=16)
+        for (int k = 0; k < m; k+=16)
+            for (int j = 0; j < m; j+=16)
+                for (int ii = i; ii < i+15; ii++)
+                    for (int kk = k; kk < k+15; kk++)
+                        for (int jj = j; jj < j+15; jj++){
+                            /* C[ii*N+jj] += A[ii*N+kk]*B[kk*N+jj]; */
+                            nmat[ii][jj] += mat[ii][kk] * jmat[kk][jj];
+                            nmat[i][j] %= N;
+                        }
+    memcpy(mat,nmat,sizeof mat);
+}
+
 void mul2(){
     ll nmat[101][101];
     memset(nmat,0,sizeof nmat);

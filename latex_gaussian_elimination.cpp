@@ -170,17 +170,17 @@ int main(){
     m = n;
     fraction mat[n][m];
     /* int a[n], b[m]; */
-    int64_t a[n], b[m];
-    for(int i = 0; i < n; ++i)
-        cin >> a[i];
-    for(int i = 0; i < m; ++i)
-        cin >> b[i];
+    /* int64_t a[n], b[m]; */
+    /* for(int i = 0; i < n; ++i) */
+    /*     cin >> a[i]; */
+    /* for(int i = 0; i < m; ++i) */
+    /*     cin >> b[i]; */
     for (int i = 0; i < n; ++i)
         for (int x = 0; x < m; ++x)
-            /* cin >> mat[i][x]; */
-            mat[i][x] = fraction(a[i] * b[x],1);
-    for(int i = 0; i < n; ++i)
-        mat[i][i] += fraction(xx,1);
+            cin >> mat[i][x];
+            /* mat[i][x] = fraction(a[i] * b[x],1); */
+    /* for(int i = 0; i < n; ++i) */
+    /*     mat[i][i] += fraction(xx,1); */
     /* string beg = "\\begin{elimination}{" + to_string(m) +  "}{1.75em}{1.1}"; */
     cout <<  "\\begin{elimination}{" << m << "}{1.75em}{1.1}\n";
     /* for (int i = 0; i < min(n,m); ++i) { */

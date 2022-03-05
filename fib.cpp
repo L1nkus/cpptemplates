@@ -29,6 +29,10 @@ int main(){
     string str;
     int n;
     cin >> n;
+    // matrix mul ->
+    // [0, 1]
+    // [1, 1]
+    // bo a1 turns into a2, a2 turns into a1 + a2.
     cout << (pow(1.0+sqrt(5),n)-pow(1.0-sqrt(5),n))/(pow(2.0,n)*sqrt(5));
 }
 

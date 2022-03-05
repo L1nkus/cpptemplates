@@ -46,19 +46,56 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-// Proofed on https://atcoder.jp/contests/agc019/tasks/agc019_c
+// Tomasz Nowak
+/*
+ * Opis: Plecak zwracający największą otrzymywalną sumę ciężarów <= bound. 
+ * Czas: O(n * max(wi)) (zamiast typowego O(n * sum(wi)))
+ * Pamięć : O(n + max(wi))
+ */
+
+#define LL ll
+LL knapsack(vector<int> w, LL bound) {
+	{
+		vector<int> filtered;
+		for(int o : w)
+			if(LL(o) <= bound)
+				filtered.emplace_back(o);
+		w = filtered;
+	}
+	{
+		LL sum = accumulate(w.begin(), w.end(), 0LL);
+		if(sum <= bound)
+			return sum;
+	}
+	LL w_init = 0;
+	int b;
+	for(b = 0; w_init + w[b] <= bound; ++b)
+		w_init += w[b];
+
+	int W = *max_element(w.begin(), w.end());
+	vector<int> prev_s(2 * W, -1);
+	auto get = [&](vector<int> &v, LL i) -> int& {
+		return v[i - (bound  - W + 1)];
+	};
+	for(LL mu = bound + 1; mu <= bound + W; ++mu)
+		get(prev_s, mu) = 0;
+	get(prev_s, w_init) = b;
+	FOR(t, b, w.size()) {
+		vector<int> curr_s = prev_s;
+		for(LL mu = bound - W + 1; mu <= bound; ++mu)
+			get(curr_s, mu + w[t]) = max(get(curr_s, mu + w[t]), get(prev_s, mu));
+		for(LL mu = bound + w[t]; mu >= bound + 1; --mu)
+			for(int j = get(curr_s, mu) - 1; j >= get(prev_s, mu); --j)
+				get(curr_s, mu - w[j]) = max(get(curr_s, mu - w[j]), j);
+		swap(prev_s, curr_s);
+	}
+	for(LL mu = bound; mu >= 0; --mu)
+		if(get(prev_s, mu) != -1)
+			return mu;
+	assert(false);
+}
  
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    vector<int> lis;
-    vector<int> a{2,1,2,2}; // not strictly.
-    for(auto &i: a){
-        auto vec_it = upper_bound(all(lis), i);
-        if(vec_it == lis.end())
-            lis.push_back(i);
-        else
-            *vec_it = min(*vec_it, i);
-    }
-    whatis(lis)
 }
 
