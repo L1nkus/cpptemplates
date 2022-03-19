@@ -28,7 +28,7 @@ typedef uint64_t ull;
 #define uset unordered_set
 using namespace std;
 using namespace __gnu_pbds;
- 
+
 #ifdef ONLINE_JUDGE
 #define whatis(x) ;
 #define debug(x...) ;
@@ -47,13 +47,14 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 #define N 1000001
 
 // Proofed on https://atcoder.jp/contests/agc019/tasks/agc019_c
- 
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     vector<int> lis;
     vector<int> a;
     for(auto &i: a){
-        auto vec_it = upper_bound(all(lis), i);
+        // To make it strict, i - 1 instead of i.
+        auto vec_it = upper_bound(all(lis), i); // i - 1 if LIS not LCIS.
         if(vec_it == lis.end())
             lis.push_back(i);
         else

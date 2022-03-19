@@ -79,7 +79,11 @@ return res;
 // https://github.com/atcoder/ac-library/blob/master/atcoder/convolution.hpp
 
 typedef complex<double> cd;
-const double PI = 4*atan(1.);
+// nie lepiej jakby constexpr było?
+/* const double PI = 4*atan(1.); */
+constexpr double PI = M_PI;
+// TODO, jeśli WA, define double long double sprobuj
+// e.g. 200000 x2 jest +1 przy +0.5 i doublach, inaczej gitr
 
 void fft(vector<cd> &a, bool invert){
     int n = a.size();
@@ -123,6 +127,8 @@ vector<int> multiply(const vector<int> a, const vector<int> b){
     vector<int> res(n);
     for(int i = 0; i < n; ++i){
         res[i] = int(fa[i].real()+0.5);
+        // TODO, jeśli WA, zmień + 0.5 na mniejsze.
+        // e.g. 200000 x2 jest +1 przy +0.5 i doublach
     }
     return res;
 }

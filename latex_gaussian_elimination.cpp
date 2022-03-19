@@ -165,26 +165,31 @@ int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int n,m;
     int xx;
-    /* cin >> n >> m; */
-    cin >> n >> xx;
-    m = n;
+    cin >> n >> m;
+    /* cin >> n >> xx; */
+    /* m = n; */
     fraction mat[n][m];
     /* int a[n], b[m]; */
-    int64_t a[n], b[m];
-    for(int i = 0; i < n; ++i)
-        cin >> a[i];
-    for(int i = 0; i < m; ++i)
-        cin >> b[i];
+    /* int64_t a[n], b[m]; */
+    /* for(int i = 0; i < n; ++i) */
+    /*     cin >> a[i]; */
+    /* for(int i = 0; i < m; ++i) */
+    /*     cin >> b[i]; */
     for (int i = 0; i < n; ++i)
-        for (int x = 0; x < m; ++x)
+        for (int x = 0; x < m; ++x){
+            string s;
+            cin >> s;
+            int ind = s.find('/');
+            mat[i][x] = fraction(stoi(s.substr(0,ind)), stoi(s.substr(ind + 1)));
+        }
             /* cin >> mat[i][x]; */
-            mat[i][x] = fraction(a[i] * b[x],1);
-    for(int i = 0; i < n; ++i)
-        mat[i][i] += fraction(xx,1);
+            /* mat[i][x] = fraction(a[i] * b[x],1); */
+    /* for(int i = 0; i < n; ++i) */
+    /*     mat[i][i] += fraction(xx,1); */
     /* string beg = "\\begin{elimination}{" + to_string(m) +  "}{1.75em}{1.1}"; */
     cout <<  "\\begin{elimination}{" << m << "}{1.75em}{1.1}\n";
-    /* for (int i = 0; i < min(n,m); ++i) { */
-    for (int i = 0; i < m; ++i) {
+    for (int i = 0; i < min(n,m); ++i) {
+    /* for (int i = 0; i < m; ++i) { */
         int wh = -1;
         for (int x = 0; x < n; ++x) {
             if (count_if(mat[x], mat[x] + i, [](auto x){return x.licz != 0;}) == 0 && mat[x][i].licz) {
@@ -265,7 +270,8 @@ int main(){
         fraction oldmat[n][m];
         memcpy(oldmat, mat, sizeof mat);
         for (int i = 0; i < n; ++i) {
-            for (int x = 0; x < m; ++x) {
+            /* for (int x = 0; x < m; ++x) { */
+            for (int x = 0; x < min(n,m); ++x) {
                 if (mat[i][x].licz) {
                     fraction factor = fraction(1,1) / mat[i][x];
                     for (int j = x; j < m; ++j) {
@@ -302,17 +308,27 @@ int main(){
                     // + vs -?
                     /* cout << "R_{" << x + 1 << "} - " << -it->second << " R_{" << x + 1 << "} "; */
                     if (it->second.licz >= 0) {
+                        /* if (it->second != fraction(1,1)) */
+                        /*     cout << "R_{" << x + 1 << "} + " << it->second << " R_{" << x + 1 << "} "; */
+                        /* else */
+                        /*     cout << "R_{" << x + 1 << "} + R_{" << x + 1 << "} "; */
                         if (it->second != fraction(1,1))
-                            cout << "R_{" << x + 1 << "} + " << it->second << " R_{" << x + 1 << "} ";
+                            cout << it->second << " R_{" << x + 1 << "} ";
                         else
-                            cout << "R_{" << x + 1 << "} + R_{" << x + 1 << "} ";
+                            cout << "R_{" << x + 1 << "} ";
                     }
                     else {
+                        /* if (-it->second != fraction(1,1)) { */
+                        /*     cout << "R_{" << x + 1 << "} - " << -it->second << " R_{" << x + 1 << "} "; */
+                        /* } */
+                        /* else { */
+                        /*     cout << "R_{" << x + 1 << "} - R_{" << x + 1 << "} "; */
+                        /* } */
                         if (-it->second != fraction(1,1)) {
-                            cout << "R_{" << x + 1 << "} - " << -it->second << " R_{" << x + 1 << "} ";
+                            cout << "-" << -it->second << " R_{" << x + 1 << "} ";
                         }
                         else {
-                            cout << "R_{" << x + 1 << "} - R_{" << x + 1 << "} ";
+                            cout << "-R_{" << x + 1 << "} ";
                         }
                     }
                 }
