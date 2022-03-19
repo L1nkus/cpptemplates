@@ -6,6 +6,7 @@
 // 64ms tylko vs 442ms model solv
 // Yep. Fastest submit by a very wide margin.
 #include <bits/stdc++.h>
+// "maximum cost cyclic flow" also
  
 using namespace std;
  
@@ -77,6 +78,14 @@ struct linked_lists {
  *   OCW MIT MIT15_082JF10_av16.pdf
  *   OCW MIT MIT15_082JF10_lec16.pdf
  */
+// To działa tak, że nie ma inherent sourcea ani sinka, tylko po prostu
+// minimalny koszt cyrkulacji, czyli takiego stworzenia dowolnych cyklów, aby
+// dla każdego nodeu in-flow == out-flow. (flow conservation)
+// No i tutaj opcjonalnie możemy dać jeszcze demand / supply na in-flow / out-flow w nodeach. (wtedy albo pochłaniają tyle flowu, albo tworzą znikąd dodatkowo. Suma stworzonych demandów powinna być sumie stworzonych supplyów)
+// To nie są lower_boundy ani upper_boundy (inaczej niż na wikipedii to).
+/* // To solve standard mcmf/mcf (dagowy) tym, dodaj edge z SINKA do SOURCA o inf capacity (lub capacity równego flowowi który chcemy; jak exact ma być, to jeszcze lower bound równy flowowi możemy dodać). */
+// Nvm, ^^ na wikipedii było ale do innego wariantu. Tutaj to solve standard MCF, dodaj demand równy M na source, supply równy M na sinku. A rzeby zrobić MCMF, dodaj edge z SINKA do SOURCA o inf capie.
+// (to działa, no bo jeśli to jest dag, to nie stworzą się żadne unrelated flowy)
 template <typename Flow, typename Cost>
 struct network_simplex {
     // we number the vertices 0,...,V-1, R is given number V.
@@ -373,20 +382,47 @@ int main() {
     cin >> a[i];
   }
   network_simplex<long, long> ns(n + 1);
-  for (int i = 0; i < n; i++) {
-    ns.add(i, i + 1, a[i], -d);
-    ns.add(i, i + 1, m, 0);
+  // Pure circulation way.
+  {
+    for (int i = 0; i < n; i++) {
+        ns.add(i, i + 1, a[i], -d);
+        ns.add(i, i + 1, m, 0);
+    }
+    for (int i = 0; i < m; i++) {
+        int l, r, c;
+        cin >> l >> r >> c;
+        ns.add(r, l - 1, 1, c);
+    }
+    assert(ns.mincost_circulation());
+    __int128_t optimum = 0;
+    for (int e = 0; e < 2 * n + m; e++) {
+        optimum += __int128_t(ns.get_flow(e)) * ns.get_cost(e);
+    }
+    cout << -optimum << '\n';
   }
-  for (int i = 0; i < m; i++) {
-    int l, r, c;
-    cin >> l >> r >> c;
-    ns.add(r, l - 1, 1, c);
+  // conv to MCF way.
+  {
+    for (int i = 0; i < n; i++) {
+        ns.add(i, i + 1, a[i], d);
+        ns.add(i, i + 1, m - a[i], 0);
+    }
+    for (int i = 0; i < m; i++) {
+        int l, r, c;
+        cin >> l >> r >> c;
+        ns.add(l - 1, r, 1, c);
+    }
+    /* ns.add(n, 0, m, 0); // mf conv */
+    ns.set_supply(0, m);
+    ns.set_demand(n, m);
+    // ohh. To trzema zarówno supply jak i demand ustawić, ciekawe.
+    // Czyli to działa trochę inaczej niż na wikipedii te lower_boundy.
+    // I nie trzeba wcale dawać edgea z n do 0.
+    assert(ns.mincost_circulation());
+    __int128_t optimum = 0;
+    for (int e = 0; e < 2 * n + m + 1; e++) {
+        optimum += __int128_t(ns.get_flow(e)) * ns.get_cost(e);
+    }
+    cout << (long long)accumulate(a.begin(), a.end(), 0ll) * d - optimum << '\n';
   }
-  assert(ns.mincost_circulation());
-  __int128_t optimum = 0;
-  for (int e = 0; e < 2 * n + m; e++) {
-    optimum += __int128_t(ns.get_flow(e)) * ns.get_cost(e);
-  }
-  cout << -optimum << '\n';
   return 0;
 }
