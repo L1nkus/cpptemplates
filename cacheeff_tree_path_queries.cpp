@@ -63,6 +63,8 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 #define N 1000001
 
+// XXX out[u] is exclusive.
+
 // Also, thanks to this op implementation, not only are hld path ids
 // contigious, but also subtree ones, so can also use this for subtree queries.
 
@@ -85,6 +87,8 @@ int k[N];
 ll b[N];
 int n,q;
 
+// XXX out[u] is exclusive.
+// <in[u], out[u]) zwraca range poddrzewa nodea u.
 int in[N], out[N], sz[N], nxt[N], p[N], d[N], in_to_orig[N];
 void dfs_sz(int v) {
     sz[v] = 1;

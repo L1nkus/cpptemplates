@@ -28,7 +28,7 @@ typedef uint64_t ull;
 #define uset unordered_set
 using namespace std;
 using namespace __gnu_pbds;
-
+ 
 #ifdef ONLINE_JUDGE
 #define whatis(x) ;
 #define debug(x...) ;
@@ -46,20 +46,50 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-// Proofed on https://atcoder.jp/contests/agc019/tasks/agc019_c
-
+template<typename T>
+class smart_ptr {
+public:
+    smart_ptr() : cnt(nullptr), data(nullptr) {}
+    smart_ptr(T *data) : cnt(new int(1)), data(data) {}
+    smart_ptr(const smart_ptr &oth) {
+        data = oth.data;
+        cnt = oth.cnt;
+        ++*cnt;
+    }
+    // zamaist 2x to samo, moze po prostu check czy cnt / data nie są nullptr,
+    // i defaultowo miej ustawione je na nullptr?
+    /* smart_ptr(const smart_ptr &oth) { */
+    /*     data = oth.data; */
+    /*     cnt = oth.cnt; */
+    /*     ++*cnt; */
+    /* } */
+    explicit smart_ptr(smart_ptr &&oth) {
+        data = oth.data;
+        cnt = oth.cnt;
+        // how to invalidate the other guy?
+        oth.data = nullptr;
+        oth.cnt = nullptr;
+    }
+    ~smart_ptr() {
+        if(cnt == nullptr)
+            return;
+        if(!--*cnt) {
+            delete cnt;
+            delete data;
+        }
+    }
+    T &operator *() {
+        return *data;
+    }
+    T &operator ->() {
+        return data;
+    }
+private:
+    int *cnt;
+    T *data;
+};
+ 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    vector<int> lis;
-    vector<int> a{2,1,2,2}; // not strictly.
-    for(auto &i: a){
-        // To make it strict, i - 1 instead of i.
-        auto vec_it = upper_bound(all(lis), i); // i - 1 if LIS not LCIS.
-        if(vec_it == lis.end())
-            lis.push_back(i);
-        else
-            *vec_it = min(*vec_it, i);
-    }
-    whatis(lis)
 }
 

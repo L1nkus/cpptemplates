@@ -5,6 +5,7 @@
 // can be useful for optimizing sq dps that need mins/maxs.
 // "Argmin at the speed of memory (~3⋅1010 integer / float elements per second)"
 
+// Did manual testing -> verdict that it's not faster at all than O3 + avx2 + max()
 const int B = 8;
 typedef int vec __attribute__ (( vector_size(4 * B) ));
 

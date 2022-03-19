@@ -28,7 +28,7 @@ typedef uint64_t ull;
 #define uset unordered_set
 using namespace std;
 using namespace __gnu_pbds;
-
+ 
 #ifdef ONLINE_JUDGE
 #define whatis(x) ;
 #define debug(x...) ;
@@ -46,20 +46,63 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-// Proofed on https://atcoder.jp/contests/agc019/tasks/agc019_c
+// https://cp-algorithms.com/combinatorics/burnside.html
+// Torus coloring.
+using Permutation = vector<int>;
 
+void operator*=(Permutation& p, Permutation const& q) {
+    Permutation copy = p;
+    for (int i = 0; i < p.size(); i++)
+        p[i] = copy[q[i]];
+}
+
+int count_cycles(Permutation p) {
+    int cnt = 0;
+    for (int i = 0; i < p.size(); i++) {
+        if (p[i] != -1) {
+            cnt++;
+            for (int j = i; p[j] != -1;) {
+                int next = p[j];
+                p[j] = -1;
+                j = next;
+            }
+        }
+    }
+    return cnt;
+}
+
+int solve(int n, int m) {
+    Permutation p(n*m), p1(n*m), p2(n*m), p3(n*m);
+    for (int i = 0; i < n*m; i++) {
+        p[i] = i;
+        // imo to p1 jakieś zbuggowane jest. Czemu nie po prostu (i + m) % (n * m)?
+        // może tutaj n a m na odwrót ma w sumie; bo symetryczne to surely.
+        // -> na to wychodzi rzeczywiście; git jeśli n to kolumny m to wiersze.
+        p1[i] = (i % n + 1) % n + i / n * n;
+        p2[i] = (i / n + 1) % m * n + i % n;
+        p3[i] = (m - 1 - i / n) * n + (n - 1 - i % n);
+    }
+
+    set<Permutation> s;
+    for (int i1 = 0; i1 < n; i1++) {
+        for (int i2 = 0; i2 < m; i2++) {
+            for (int i3 = 0; i3 < 2; i3++) {
+                s.insert(p);
+                p *= p3;
+            }
+            p *= p2;
+        }
+        p *= p1;
+    }
+
+    int sum = 0;
+    for (Permutation const& p : s) {
+        sum += 1 << count_cycles(p);
+    }
+    return sum / s.size();
+}
+ 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    vector<int> lis;
-    vector<int> a{2,1,2,2}; // not strictly.
-    for(auto &i: a){
-        // To make it strict, i - 1 instead of i.
-        auto vec_it = upper_bound(all(lis), i); // i - 1 if LIS not LCIS.
-        if(vec_it == lis.end())
-            lis.push_back(i);
-        else
-            *vec_it = min(*vec_it, i);
-    }
-    whatis(lis)
 }
 
