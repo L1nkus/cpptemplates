@@ -44,7 +44,7 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-//pożyczone z https://github.com/mareksom/acmlib/blob/master/code/kamil/halfplanes.cpp
+// https://github.com/mareksom/acmlib/blob/master/code/kamil/halfplanes.cpp
 
 // halfplanes_online
 #define X real()

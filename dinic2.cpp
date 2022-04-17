@@ -11,7 +11,7 @@
 #define FORREV(x,plus,arr) for(auto x = (arr).rbegin()+(plus); x !=(arr).rend(); ++x)
 #define REE(s_) {cout<<s_<<'\n';exit(0);}
 #define GET(arr) for(auto &i: (arr)) sc(i)
-#define whatis(x) cerr << #x << " is " << x << endl;
+#define whatis(x) cerr << #x << " is " << (x) << endl;
 #define e1 first
 #define e2 second
 #define INF 0x7f7f7f7f
@@ -41,75 +41,107 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-vector<int> adj[N]; //index of edge
-int edge[N]; //sum of 2 nodes; 0 means taken
-vector<int> euler; //list of nodes in order of eulerian traversal
-vector<vector<int>> cycles; //individual simple cycles making up the euler cycle
-bool vis[N];
-
-void dfs(int v){
-/* void dfs(int v, int pedge){ */
-    while(!adj[v].empty()){
-        // co ten if robi?
-        if(edge[adj[v].back()]){
-        // does that fix it?
-        // albo w ogólę usuniecie?
-        /* if(edge[adj[v].back()] && pedge != adj[v].back()){ */
-            int oth = edge[adj[v].back()]-v;
-                //if undirected also set edge[] to 0, and make a check for it
-                //beforehands
-            // to to wyjasnia wsm
-            edge[adj[v].back()] = 0;
-            adj[v].pop_back();
-            dfs(oth);
-            /* dfs(oth, edge[adj[v].back()]); */
-            euler.push_back(oth);
-        }
-        else{
-            adj[v].pop_back();
+using T = long long;
+struct Flow{
+    struct E{
+        int dest;
+        T orig,*lim, *rev;
+    };
+    int zr,uj,n = 0;
+    vector<unique_ptr<T>> ts;
+    vector<vector<E>> graf;
+    vector<int> ptr,odl;
+    void vert(int v){
+        n = max(n,v+1);
+        graf.resize(n);
+        ptr.resize(n);
+        odl.resize(n);
+    }
+    bool iszer(T v){
+        return !v;
+    }
+    void bfs(){
+        fill(odl.begin(),odl.end(),0);
+        vector<int> kol = {zr};
+        odl[zr] = 1;
+        for(int i = 0; i < (int) kol.size(); ++i){
+            for(E& e: graf[kol[i]]){
+                if(!odl[e.dest] && !iszer(*e.lim)){
+                    odl[e.dest] = odl[kol[i]] + 1;
+                    kol.push_back(e.dest);
+                }
+            }
         }
     }
-}
+    T dfs(int v, T lim){
+        if(v == uj) return lim;
+        T ret = 0, wez;
+        for(int &i = ptr[v]; i < (int) graf[v].size(); ++i){
+            E& e = graf[v][i];
+            if(odl[e.dest] == odl[v]+1 && !iszer(*e.lim) && !iszer(wez = dfs(e.dest,min(*e.lim,lim)))){
+                ret += wez;
+                *e.lim -= wez;
+                *e.rev += wez;
+                lim -= wez;
+                if(iszer(lim)) break;
+            }
+        }
+        return ret;
+    }
+    void add_edge(int u, int v, T lim, bool bi = false){
+        vert(max(u,v));
+        T *a = new T(lim), *b = new T(lim*bi);
+        ts.emplace_back(a);
+        ts.emplace_back(b);
+        graf[u].push_back(E{v,lim,a,b});
+        graf[v].push_back(E{v,lim*bi,b,a});
+    }
+    T dinic(int zr_, int uj_){
+        zr = zr_;
+        uj = uj_;
+        vert(max(zr,uj));
+        T ret = 0;
+        while(true){
+            bfs();
+            fill(ptr.begin(),ptr.end(),0);
+            const T sta = dfs(zr,numeric_limits<T>::max());
+            if(iszer(sta)) break;
+            ret += sta;
+        }
+        return ret;
+    }
+    vector<int> cut(){
+        vector<int> ret;
+        bfs();
+        for(int i = 0; i < n; ++i){
+            if(odl[i]){
+                ret.push_back(i);
+            }
+        }
+        return ret;
+    }
+    map<pair<int,int>,T> get_flowing(){
+        map<pair<int,int>,T> ret;
+        for(int i = 0; i < n; ++i){
+            for(E& e : graf[i]){
+                if(*e.lim < e.orig){
+                    ret[make_pair(i,e.dest)] += e.orig-*e.lim;
+                }
+            }
+        }
+        for(auto &i: ret){
+            const pair<int,int> rev(i.first.second,i.first.first);
+            const T x = min(i.second,ret[rev]);
+            i.second -= x;
+            ret[rev] -= x;
+        }
+        return ret;
+    }
 
+};
+
+//8:13
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int n,m;
-    sc(n,m);
-    int f,s;
-    // doesn't work with multiple edges
-    FOR(i,0,m){
-        sc(f,s);
-        --f,--s;
-        adj[f].pb(i);
-            // if it were undireted
-        adj[s].pb(i);
-            // or doesn't rly work
-        edge[i] = f+s;
-        /* int w; */
-        /* sc(w); */
-    }
-    dfs(0);
-    /* dfs(0,-1); */
-    euler.push_back(0);
-    reverse(all(euler));
-    cout << euler << '\n';
-    stack<int> st;
-    FORR(i,euler){
-        if(vis[i]){
-            cycles.push_back({i});
-            while(st.top() != i){
-                vis[st.top()] ^= 1;
-                cycles.back().push_back(st.top());
-                st.pop();
-            }
-            cycles.back().push_back(i);
-            reverse(all(cycles.back()));
-        }
-        else{
-            vis[i] ^= 1;
-            st.push(i);
-        }
-    }
-    cout << cycles << '\n';
 }
 

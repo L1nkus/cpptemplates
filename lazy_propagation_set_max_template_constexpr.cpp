@@ -40,12 +40,12 @@ template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=g
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-//Lazy Propagation on Increment Modifications, Sum queries
+//Lazy Propagation on Set Modifications, Max queries
 
-/* #define N 10000 */
-#define N 1000000
+#define N 10000
+/* #define N 12 */
 int t[N << 2];
-int lazy[N << 2];
+bool mark[N << 2];
 
 void build(int v, int tl, int tr, int arr[]){
     if(tl == tr){
@@ -55,64 +55,78 @@ void build(int v, int tl, int tr, int arr[]){
     int tm = (tl+tr)>>1;
     build(v<<1,tl,tm,arr);
     build(v<<1|1,tm+1,tr,arr);
-    t[v] = t[v<<1] + t[v<<1|1];
+    t[v] = max(t[v<<1], t[v<<1|1]);
 }
 
-void push(int v, int tl, int tr){
-    if(lazy[v]){
-        int tm = (tl+tr)>>1;
-        t[v<<1] += (tm-tl+1)*lazy[v];
-        t[v<<1|1] += (tr-tm)*lazy[v];
-        lazy[v<<1] += lazy[v];
-        lazy[v<<1|1] += lazy[v];
-        lazy[v] = 0;
-    }
+void push(int v){
+    t[v<<1] = t[v<<1|1] = t[v];
+    mark[v<<1] = mark[v<<1|1] = 1;
+    mark[v] = 0;
+
 }
 
 void modify(int v, int tl, int tr, int l, int r, int val){
     if(l > r) return;
     if(tl == l && tr == r){
-        lazy[v] += val;
-        t[v] += val*(tr-tl+1);
+        t[v] = val;
+        mark[v] = 1;
         return;
     }
-    push(v,tl,tr);
+    if(mark[v])
+        push(v);
     int tm = (tl+tr)>>1;
-    modify(v << 1,tl,tm,l,min(tm,r),val);
-    modify(v << 1 | 1,tm+1,tr,max(l,tm+1),r,val);
-    t[v] = t[v<<1] + t[v<<1|1];
+    modify(v<<1,tl,tm,l,min(tm,r),val);
+    modify(v<<1|1,tm+1,tr,max(l,tm+1),r,val);
+    t[v] = max(t[v<<1],t[v<<1|1]);
 }
 
-int query(int v, int tl, int tr, int l, int r){
-    /* whatis(mp(tl,tr)) */
-    /* whatis(t[v]) */
-    if(l > r) return 0;
+template<int v, int tl, int tr>
+int query(int l, int r){
+    static_assert(tl <= tr);
+    if(l < tl || r > tr)
+        __builtin_unreachable();
+    /* if constexpr(v <= 0) */
+    /*     __builtin_unreachable(); */
+    /* if constexpr(v > (N << 2)) */
+    /*     __builtin_unreachable(); */
+    // ten warunek l > r nie jest brany pod uwagę przy matchingu.
+    // muszę coś zależnego tylko od tl, tr też.
+    if (l > r) return -0x7f7f7f7f;
     if(tl == l && tr == r){
         return t[v];
     }
-    push(v,tl,tr);
-    int tm = (tl+tr)>>1;
-    return query(v<<1,tl,tm,l,min(tm,r)) + query(v<<1|1,tm+1,tr,max(l,tm+1),r);
+    else{
+        if constexpr(tl == tr)
+            __builtin_unreachable();
+            /* return 2137; */
+        if constexpr(tl != tr){ // -> compiled XDDDDDD
+            if(mark[v])
+                push(v);
+            constexpr int tm = (tl+tr)>>1;
+            return max(
+            query<v<<1,tl,tm>(l,min(tm,r)),
+            query<v<<1|1,tm+1,tr>(max(l,tm+1),r)
+            );
+        }
+    }
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    /* int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8}; // n = 12 */
-    int n;
-    sc(n);
-    int arr[n];
-    GET(arr);
+    int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8};
     /* FORR(i,arr) */
     /*     cerr << i << ' '; */
     /* cerr << endl; */
-    /* int n = sizeof arr / sizeof *arr; */
+    /* constexpr int n = sizeof arr / sizeof *arr; */
+    constexpr int n = 1000; // z 1000 jeszcze się kompiluje w skończonym czasie xd
     build(1,0,n-1,arr);
     int q,f,s,val,mode;
     sc(q);
     while(q--){
         sc(mode,f,s);
         if(mode == 1){ //query
-            cout << query(1,0,n-1,f,s) << '\n';
+            cout << query<1,0,n-1>(f,s) << endl;
+            /* cout << query(1,0,n-1,f,s) << '\n'; */
         }
         else{
             sc(val);

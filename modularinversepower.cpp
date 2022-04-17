@@ -66,7 +66,8 @@ inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
     return mulmod(a,b >> 1,mod)*2%mod;
 }
 
-constexpr int64_t mod = 1000000007;
+/* constexpr int64_t mod = 1000000007; */
+constexpr int64_t mod = 998244353;
 inline int64_t fastpow(int64_t a, int64_t b){
     if(b == 0)
         return 1;
@@ -101,18 +102,17 @@ ll fac[N];
 ll facinv[N];
 
 // constexpr btw?
+// -> operation limit that can't be changed by a pragma is too low. (agc051a.cpp tried on pc)
 void pre(){
     fac[0] = 1;
     FOR(i,1,N)
         fac[i] = fac[i - 1] * i % mod;
-#if N == 1000001
-    if constexpr (mod == 1000000007)
+    if constexpr (mod == 1000000007 && N == 1000001)
         facinv[N - 1] = 397802501;
+    else if constexpr (mod == 998244353 && N == 1000001)
+        facinv[N - 1] = 490058372;
     else
         facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
-#else
-    facinv[N - 1] = fastpow(fac[N - 1], mod - 2);
-#endif
     for(int i = N - 2; i >= 0; --i)
         facinv[i] = facinv[i + 1] * (i + 1) % mod;
     // Also i^-1 = facinv[i] * fac[i - 1] (i in 1..n)
@@ -120,10 +120,31 @@ void pre(){
     // -> zamiast *1, *2, *3... do *a[0], *a[1], *a[2]...
 }
 
+ll binom(ll n, ll k){
+    return fac[n] * facinv[k] % mod * facinv[n - k] % mod;
+}
+
+ll stirling2(ll n, ll k){
+    // S2(n,k) = (sum_{j=0}^{k}(-1)^{j}*binom(k,j)*(k-j)^n)/k!
+    // Jeśli chcę wyliczyć wszystkie stirlingi z danym n, a tylko rosnące k, to
+    // mogę fft użyć, i przemnożyć wielomiany [((-1)^i)/(i!)...], [(i^n)/(i!)]
+    // S2(n+k+1,k) = sum_{j=0}^{k}S2(n+j,j)*j
+    ll res = 0;
+    FORE(i,0,k){
+        ll cr = binom(k, i) * fastpow(k - i, n) % mod;
+        if(i&1)
+            res -= cr;
+        else
+            res += cr;
+        res %= mod;
+    }
+    res *= facinv[k];
+    return res % mod;
+}
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     pre();
-    /* whatis(facinv[N - 1]) */
     int a = 5, b = 2;
     int invb = modInverse(b,mod);
     int adivbmodmod = a*invb%mod;

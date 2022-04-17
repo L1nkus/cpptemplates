@@ -11,7 +11,7 @@
 #define FORREV(x,plus,arr) for(auto x = (arr).rbegin()+(plus); x !=(arr).rend(); ++x)
 #define REE(s_) {cout<<s_<<'\n';exit(0);}
 #define GET(arr) for(auto &i: (arr)) sc(i)
-#define whatis(x) cerr << #x << " is " << x << endl;
+#define whatis(x) cerr << #x << " is " << (x) << endl;
 #define e1 first
 #define e2 second
 #define INF 0x7f7f7f7f
@@ -25,10 +25,15 @@ typedef uint64_t ull;
 using namespace std;
 using namespace __gnu_pbds;
 
+#ifdef ONLINE_JUDGE
+#define whatis(x) ;
+#endif
 #ifdef _WIN32
 #define getchar_unlocked() _getchar_nolock()
 #define _CRT_DISABLE_PERFCRIT_LOCKS
 #endif
+template<class L, class R> ostream& operator<<(ostream &os, map<L, R> P) { for(auto const &vv: P)os<<"("<<vv.first<<","<<vv.second<<")"; return os; }
+template<class T> ostream& operator<<(ostream &os, set<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class T> ostream& operator<<(ostream &os, vector<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class L, class R> ostream& operator<<(ostream &os, pair<L, R> P) { os<<"("<<P.first<<","<<P.second<<")"; return os; }
 inline int fstoi(const string &str){auto it=str.begin();bool neg=0;int num=0;if(*it=='-')neg=1;else num=*it-'0';++it;while(it<str.end()) num=num*10+(*it++-'0');if(neg)num*=-1;return num;}
@@ -37,71 +42,42 @@ inline void getstr(string &str){str.clear(); char cur;while(cur=getchar_unlocked
 template<typename T> inline bool sc(T &num){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){if(c == EOF) return false;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; return true;}template<typename T, typename ...Args> inline void sc(T &num, Args &...args){ bool neg=0; int c; num=0; while(c=getchar_unlocked(),c<33){;} if(c=='-'){ neg=1; c=getchar_unlocked(); } for(;c>47;c=getchar_unlocked()) num=num*10+c-48; if(neg) num*=-1; sc(args...); }
 template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>; //s.find_by_order(), s.order_of_key() <- works like lower_bound
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-
-struct Vertex {
-    Vertex *l, *r;
-    int sum;
-
-    Vertex(int val) : l(nullptr), r(nullptr), sum(val) {}
-    Vertex(Vertex *l, Vertex *r) : l(l), r(r), sum(0) {
-        if (l) sum += l->sum;
-        if (r) sum += r->sum;
-    }
-};
-
-#define N 200007
-Vertex *v[N];
-
-Vertex* build(int a[], int tl, int tr) {
-    if (tl == tr)
-        return new Vertex(1);
-    int tm = (tl + tr) / 2;
-    return new Vertex(build(a, tl, tm), build(a, tm+1, tr));
-}
-
-int get_sum(Vertex* v, int tl, int tr, int l, int r) {
-    if (l > r)
-        return 0;
-    if (l == tl && tr == r)
-        return v->sum;
-    int tm = (tl + tr) / 2;
-    return get_sum(v->l, tl, tm, l, min(r, tm))
-         + get_sum(v->r, tm+1, tr, max(l, tm+1), r);
-}
-
-Vertex* update(Vertex* v, int tl, int tr, int pos) {
-    if (tl == tr)
-        return new Vertex(0);
-    int tm = (tl + tr) / 2;
-    if (pos <= tm)
-        return new Vertex(update(v->l, tl, tm, pos), v->r);
-    else
-        return new Vertex(v->l, update(v->r, tm+1, tr, pos));
-}
+#define N 1000001
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int n;
-    sc(n);
-    int a[n];
-    GET(a);
-    pair<int,int> in[n];
+    srand(time(0));
+    /* int n = 4; */
+    int n = 1000;
+    /* int n = 200000; */
+    /* int n = 1000000; */
+    cout << n << '\n';
     FOR(i,0,n){
-        in[i]= {a[i],i};
+        cout << rand()%20 << ' ';
+        /* cout << rand()%400-800 << ' '; */
     }
-    sort(in,in+n);
-    ll ans = 0;
-    v[1] = build(a,0,n-1);
-    int it = 0;
-    FORE(i,2,n){
-        v[i] = v[i-1];
-        while(in[it].e1 < i){
-            v[i] = update(v[i], 0, n-1, in[it].e2);
-            ++it;
+    cout << '\n';
+    /* int q = 1000; */
+    int q = 10000;
+    /* int q = 10; */
+    /* int q = 30; */
+    cout << q << '\n';
+    while(q--){
+        /* int mode = rand()%3; */
+        int mode = 1+rand()%3;
+        /* int mode = 1+rand()%6; */
+        int f = rand()%n;
+        int s = f + rand()%(n-f);
+        cout << mode << ' ' << f << ' ' << s;
+        /* if(mode){ */
+        if(mode != 1){
+            int val = rand()%20;
+            /* int val = rand()%400-800; */
+            if(mode == 6)
+                val = max(val, 1);
+            cout << ' ' << val;
         }
+        cout << '\n';
     }
-    FOR(i,1,n){
-        ans += get_sum(v[i+1], 0, n-1, 0, min(i-1,a[i]-1));
-    }
-    cout << ans << '\n';
 }
+

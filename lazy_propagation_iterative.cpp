@@ -11,7 +11,7 @@
 #define FORREV(x,plus,arr) for(auto x = (arr).rbegin()+(plus); x !=(arr).rend(); ++x)
 #define REE(s_) {cout<<s_<<'\n';exit(0);}
 #define GET(arr) for(auto &i: (arr)) sc(i)
-#define whatis(x) cerr << #x << " is " << x << endl;
+#define whatis(x) cerr << #x << " is " << (x) << endl;
 #define e1 first
 #define e2 second
 #define INF 0x7f7f7f7f
@@ -25,6 +25,9 @@ typedef uint64_t ull;
 using namespace std;
 using namespace __gnu_pbds;
 
+#ifdef ONLINE_JUDGE
+#define whatis(x) ;
+#endif
 #ifdef _WIN32
 #define getchar_unlocked() _getchar_nolock()
 #define _CRT_DISABLE_PERFCRIT_LOCKS
@@ -41,75 +44,104 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-vector<int> adj[N]; //index of edge
-int edge[N]; //sum of 2 nodes; 0 means taken
-vector<int> euler; //list of nodes in order of eulerian traversal
-vector<vector<int>> cycles; //individual simple cycles making up the euler cycle
-bool vis[N];
+int t[N << 1];
+int h = sizeof(int) * 8 - __builtin_clz(N);
+bool d[N];
+int ile[N << 1];
 
-void dfs(int v){
-/* void dfs(int v, int pedge){ */
-    while(!adj[v].empty()){
-        // co ten if robi?
-        if(edge[adj[v].back()]){
-        // does that fix it?
-        // albo w ogólę usuniecie?
-        /* if(edge[adj[v].back()] && pedge != adj[v].back()){ */
-            int oth = edge[adj[v].back()]-v;
-                //if undirected also set edge[] to 0, and make a check for it
-                //beforehands
-            // to to wyjasnia wsm
-            edge[adj[v].back()] = 0;
-            adj[v].pop_back();
-            dfs(oth);
-            /* dfs(oth, edge[adj[v].back()]); */
-            euler.push_back(oth);
-        }
-        else{
-            adj[v].pop_back();
-        }
+int n;
+
+void calc(int p, int k) {
+  /* if (d[p] == 0) t[p] = t[p<<1] + t[p<<1|1]; */
+  /* else t[p] = d[p] * k; */
+  if (d[p] == 0) t[p] = t[p<<1] + t[p<<1|1];
+  /* else t[p] = (k - t[p] * k); */
+  else t[p] = (k - t[p]);
+}
+
+void apply(int p, int value, int k) {
+  /* t[p] = value * k; */
+  /* if (p < n) d[p] = value; */
+  t[p] = (k - t[p]);
+  /* if (p < n) d[p] = value; */
+  if (p < n) d[p] ^= 1;
+}
+
+void build(int l, int r) {
+  int k = 2;
+  for (l += n, r += n-1; l > 1; k <<= 1) {
+    l >>= 1, r >>= 1;
+    for (int i = r; i >= l; --i) calc(i, k);
+  }
+}
+
+void push(int l, int r) {
+  int s = h, k = 1 << (h-1);
+  for (l += n, r += n-1; s > 0; --s, k >>= 1)
+    for (int i = l >> s; i <= r >> s; ++i) if (d[i] != 0) {
+      apply(i<<1, d[i], k);
+      apply(i<<1|1, d[i], k);
+      d[i] = 0;
     }
+}
+
+/* void modify(int l, int r, int value) { */
+/*   if (value == 0) return; */
+/*   push(l, l + 1); */
+/*   push(r - 1, r); */
+/*   int l0 = l, r0 = r, k = 1; */
+/*   for (l += n, r += n; l < r; l >>= 1, r >>= 1, k <<= 1) { */
+/*     if (l&1) apply(l++, value, k); */
+/*     if (r&1) apply(--r, value, k); */
+/*   } */
+/*   build(l0, l0 + 1); */
+/*   build(r0 - 1, r0); */
+/* } */
+
+void modify(int l, int r, int value) {
+  if (value == 0) return;
+  push(l, l + 1);
+  push(r - 1, r);
+  bool cl = false, cr = false;
+  int k = 1;
+  for (l += n, r += n; l < r; l >>= 1, r >>= 1, k <<= 1) {
+    if (cl) calc(l - 1, k);
+    if (cr) calc(r, k);
+    /* if (l&1) apply(l++, value, k), cl = true; */
+    /* if (r&1) apply(--r, value, k), cr = true; */
+    if (l&1) apply(l++, value, k), cl = true;
+    if (r&1) apply(--r, value, k), cr = true;
+  }
+  for (--l; r > 0; l >>= 1, r >>= 1, k <<= 1) {
+    if (cl) calc(l, k);
+    if (cr && (!cl || l != r)) calc(r, k);
+  }
+}
+
+int query(int l, int r) {
+  push(l, l + 1);
+  push(r - 1, r);
+  int res = 0;
+  for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+    if (l&1) res += t[l++];
+    if (r&1) res += t[--r];
+  }
+  return res;
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    int n,m;
-    sc(n,m);
-    int f,s;
-    // doesn't work with multiple edges
-    FOR(i,0,m){
-        sc(f,s);
-        --f,--s;
-        adj[f].pb(i);
-            // if it were undireted
-        adj[s].pb(i);
-            // or doesn't rly work
-        edge[i] = f+s;
-        /* int w; */
-        /* sc(w); */
-    }
-    dfs(0);
-    /* dfs(0,-1); */
-    euler.push_back(0);
-    reverse(all(euler));
-    cout << euler << '\n';
-    stack<int> st;
-    FORR(i,euler){
-        if(vis[i]){
-            cycles.push_back({i});
-            while(st.top() != i){
-                vis[st.top()] ^= 1;
-                cycles.back().push_back(st.top());
-                st.pop();
-            }
-            cycles.back().push_back(i);
-            reverse(all(cycles.back()));
-        }
-        else{
-            vis[i] ^= 1;
-            st.push(i);
-        }
-    }
-    cout << cycles << '\n';
+    n = 10;
+    h = sizeof(int) * 8 - __builtin_clz(N);
+    modify(2,5,3);
+    modify(3,3,3);
+    /* modify(3,5,3); */
+    whatis(query(2,2))
+    whatis(query(3,3))
+    whatis(query(4,4))
+    whatis(query(2,3))
+    whatis(query(2,5))
+    whatis(query(2,7))
+    whatis(query(0,6))
 }
 

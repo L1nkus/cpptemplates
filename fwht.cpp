@@ -106,8 +106,6 @@ namespace FWHT {
   }
 }
 
-
-
 void solve() {
     int n;
     ll k;
