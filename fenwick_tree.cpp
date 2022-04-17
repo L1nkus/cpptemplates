@@ -1,3 +1,4 @@
+#pragma GCC target("bmi,bmi2,popcnt,lzcnt")
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -46,15 +47,44 @@ int t[N];
 //1 INDEXED, increment in function if needed
 
 inline void upd(int pos, int val){ //val is delta
+    // todo unrolled opt na podstawie popcountu xdddd
+    // w przypadku upd, jeżeli n jest potęgą dwójki, which it should, ilość
+    // iteracji to __log(N) - popcnt(pos) - ffs(pos)
+    // całe pos -= pos & (-pos) translates into 1 instruction blsr, much better than some 1 << ffs
+    // But, only z #pragma GCC target("bmi")
+    // ; pos & (-pos) translated into blsi alone, gdy trzema += zamiast -=.
     for(;pos <= n;pos += pos & (-pos))
             //simply for(;posy <= m;posy += posy & (-posy)) for 2nd dimension
         t[pos] += val;
 }
 
 inline int query(int r){ //[0,r]
+    // tutaj po prostu ilość iteracji to popcnt
     int ret = 0;
     for(;r > 0;r -= r & (-r))
         ret += t[r];
+    return ret;
+}
+
+inline int query2(int r){ //[0,r]
+    int ret = 0;
+    int ile = __builtin_popcount(r);
+    switch(ile){
+        default:
+            __builtin_unreachable(); // to mega pomaga, inaczej jeszcze musi caseować < 0 albo > maxval tutaj. (potężne 2 instructions saved)
+        case 4:
+            ret += t[r];
+            r -= r & (-r);
+        case 3:
+            ret += t[r];
+            r -= r & (-r);
+        case 2:
+            ret += t[r];
+            r -= r & (-r);
+        case 1:
+            ret += t[r];
+            r -= r & (-r);
+    }
     return ret;
 }
 

@@ -56,7 +56,7 @@ int sz;
 void insertvec(int mask){
 	/* for(int i = 0; i < LOG_A; i++){ */
 	for(int i = LOG_A - 1; i >= 0; --i){
-		if((mask & 1 << i) == 0)
+		if((mask & 1ll << i) == 0)
             continue;
 
 		if(!basis[i]){
@@ -72,7 +72,7 @@ void insertvec(int mask){
 int getminxored(int num){
 	/* for(int i = 0; i < LOG_A; i++){ */
 	for(int i = LOG_A - 1; i >= 0; --i){
-		if((num & 1 << i) == 0)
+		if((num & 1ll << i) == 0)
             continue;
 
 		/* if(!basis[i]){ */

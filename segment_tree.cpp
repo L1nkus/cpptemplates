@@ -58,7 +58,7 @@ const int N = 1e5+2; //Sometimes must be scaled into a power of 2!!!!!!!!!!!!!
 template<ll op(ll, ll), ll baseval>
 class seg{
 public:
-    ll t[N*2];
+    ll t[N*2]; // XXX jeżeli wiele testów to się kwadraci z t takim.
     ll n;
 
     ll query(ll l, ll r){
