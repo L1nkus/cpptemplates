@@ -48,21 +48,13 @@ vector<vector<int>> cycles; //individual simple cycles making up the euler cycle
 bool vis[N];
 
 void dfs(int v){
-/* void dfs(int v, int pedge){ */
     while(!adj[v].empty()){
-        // co ten if robi?
         if(edge[adj[v].back()]){
-        // does that fix it?
-        // albo w ogólę usuniecie?
-        /* if(edge[adj[v].back()] && pedge != adj[v].back()){ */
             int oth = edge[adj[v].back()]-v;
                 //if undirected also set edge[] to 0, and make a check for it
                 //beforehands
-            // to to wyjasnia wsm
-            edge[adj[v].back()] = 0;
             adj[v].pop_back();
             dfs(oth);
-            /* dfs(oth, edge[adj[v].back()]); */
             euler.push_back(oth);
         }
         else{
@@ -76,20 +68,14 @@ int main(){
     int n,m;
     sc(n,m);
     int f,s;
-    // doesn't work with multiple edges
     FOR(i,0,m){
         sc(f,s);
-        --f,--s;
         adj[f].pb(i);
-            // if it were undireted
-        adj[s].pb(i);
-            // or doesn't rly work
+            //if it were undireted
+        /* adj[s].pb(i); */
         edge[i] = f+s;
-        /* int w; */
-        /* sc(w); */
     }
     dfs(0);
-    /* dfs(0,-1); */
     euler.push_back(0);
     reverse(all(euler));
     cout << euler << '\n';

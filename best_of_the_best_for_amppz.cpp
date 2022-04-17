@@ -280,7 +280,6 @@ int main(){
  *   convolution_xor(a, b)[i] = suma(j ^ k == i) a[j] * b[k].
  */
 
-#define ssize(x) (x).size()
 vector<int> fwht_or(vector<int> a) {
 	int n = ssize(a);
 	assert((n & (n - 1)) == 0);
@@ -304,7 +303,7 @@ vector<int> convolution_or(vector<int> a, vector<int> b) {
 	assert((n & (n - 1)) == 0 and ssize(b) == n);
 	a = fwht_or(a);
 	b = fwht_or(b);
-    FOR(i,0,n)
+	REP(i, n)
 		a[i] *= b[i];
 	return ifwht_or(a);
 }
@@ -332,7 +331,7 @@ vector<int> convolution_and(vector<int> a, vector<int> b) {
 	assert((n & (n - 1)) == 0 and ssize(b) == n);
 	a = fwht_and(a);
 	b = fwht_and(b);
-    FOR(i,0,n)
+	REP(i, n)
 		a[i] *= b[i];
 	return ifwht_and(a);
 }

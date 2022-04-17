@@ -47,7 +47,6 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 /* #define N 100001 */
 #define N 1000001
 
-// def todo własny lower_bound obv xd.
 // potrzebuję własny iterator also pod ++, --.
 template<typename T>
 class fastset {
@@ -107,36 +106,6 @@ public:
     // komparator raczej.
     // No i obv zaimplementowanie iteratora też byłoby czymś, aczkolwiek może
     // nawet czymś łatwiejszym.
-
-    // -> Nvm, erase actually would not be syfem. Po prostu przy erasowaniu
-    // ustawianie elementu na -1 jeśli na prawo nie jest erased, inaczej na
-    // to na prawo -1, i na lewo spropaguj to dla all co śą zerasowane, tak aby
-    // na erase wartość wynosiła zawsze -ile miejsc w prawo do next non-erased.
-
-    // XXX 170422 also, pomysł z użyciem DSU do tego. Wtedy bardzo szybkie logn/alpha n, aby otrzymać najbliższe nonerased (CERC14C technique).
-    // (po prostu trzymaj closest nonerased na pałe, i wtedy reku funkcja find()), a unite() jak coś usuwam.
-    // Also, tą dsu-korekcję jedynie musiałbym robić po ::lower_boundzie. Bo
-    // git jak ::lower_bound zwróci nawiązanie do erased elementu, no bo wtedy
-    // po prostu jak do dsu użyję to mam correct wynik ez. -> No overhead basically <3
-    // No i wtedy też insert bez zmiany właściwie, bo tak jak wcześniej robię
-    // lower_bound i tyle. (ewentualnie could check czy mogę zastąpić erased
-    // elem zamiast robić vector::insert, jako opt)
-    // -> w sumie, mógłbym sb ten erase z łatwością naklepać. def to
-    // kiedyś zrobię, pytanie czy teraz, given jak spory hype na mm i inne
-    // fajny rzeczy mam xd
-
-    // -> W lower_boundzie tylko if jeden trzeba dodać wtedy.
-    // Jedynie jest syfniej, jeżeli to nie ma być set od typu liczbowego, bo
-    // albo trzeba jeszcze w jakiejś parze trzymać tą wartość pod erasowania,
-    // albo jakimś hackowańskiem castować wartość na typ intowy i sprawdzać czy
-    // jest ujemne, zakładając że normalnie nie jest bo e.g. to wskaźnik.
-    // But come on, jak chcesz robić erasy na secie, to nie powinienem mieć go
-    // od jakiegoś stringa xd.
-    // -> Jedynie warto aby handlować też wtedy jakieś pary, i ew. arraye.
-    // -> Możnaby templateowo zdefiniować inline funkcję zwracającą referencję
-    // do tego elementu co normalnie jest nieujemny, a ma być użyty do
-    // trzymania erasowości.
-    // (or rather -dsu link to nonerased tera)
     ssize_t size() const {
         /* return large.size() + small.size(); */
         return large.size();
@@ -169,16 +138,11 @@ private:
 // 1024 -> 0.038
 // 8024 -> 0.028
 // 20k, 30l -> 0.03s
-// 0.023 nowa wersja z implace_mergem na 4096 small_boundzie.
 
 // 1M inserts std::set 0.533s ; 0.509s 1024bnd2xvec | 0.332s 4096; | 10096 0.369s; | 0.332 5096 | 0.377s 2048
 // 1M z vecxsetem dla 30000 0.487s najlepiej. -> 2 vecs def more worthwhile.
 // Singular vec, inplace_sort 4096 0.309s nc. Def better and more worthwhile.
 // Fastest na O2 czystym btw.
-// 170422
-// z 1M lower_bounds jeszcze.
-// std::set -> 0.964
-// fastset 4096 implace_merge without erase -> 0.487s. Czyli 400ms vs 150ms lb cost, i to bez własnego zoptowanego lower_bounda z constexpr i prefetchingiem. pog.
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     fastset<int> st;
@@ -188,14 +152,7 @@ int main(){
     random_shuffle(a,a+N);
     FORR(i,a)
         st.insert(i);
-    /* cout << st.lower_bound(-4) << ' ' << st.lower_bound(2137) << '\n'; */
-    int sth = 0;
-    /* FOR(x,0,N){ */
-    FORR(x,a){
-        /* sth += *st.lower_bound(x); */
-        sth += st.lower_bound(x);
-    }
-    cout << sth << '\n';
+    cout << st.lower_bound(-4) << ' ' << st.lower_bound(2137) << '\n';
     /* cout << *st.lower_bound(-4) << ' ' << *st.lower_bound(2137) << '\n'; */
 }
 

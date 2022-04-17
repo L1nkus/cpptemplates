@@ -54,7 +54,7 @@ class linkustree{
     linkustree(int l, int r, int val){
         init(l,r,val);
     }
-    set<sth>::iterator insert(int l, int r, int val){
+    void insert(int l, int r, int val){
         set<sth>::iterator it = prev(s.upper_bound({l,0,0}));
         if(it->r >= r){ //inside element
             if(it->val != val){
@@ -68,7 +68,7 @@ class linkustree{
                 if(r+1 <= origr)
                     s.insert({r+1,origr,origval});
             }
-            return it;
+            return;
         }
         if(it->val == val){
             int origl = it->l;
@@ -112,7 +112,6 @@ class linkustree{
                 s.erase(prev(it));
             }
         }
-        return it;
     }
 };
 

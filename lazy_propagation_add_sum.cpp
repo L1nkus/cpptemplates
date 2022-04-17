@@ -42,8 +42,7 @@ template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree
 
 //Lazy Propagation on Increment Modifications, Sum queries
 
-/* #define N 10000 */
-#define N 1000000
+#define N 10000
 int t[N << 2];
 int lazy[N << 2];
 
@@ -97,15 +96,11 @@ int query(int v, int tl, int tr, int l, int r){
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    /* int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8}; // n = 12 */
-    int n;
-    sc(n);
-    int arr[n];
-    GET(arr);
+    int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8};
     /* FORR(i,arr) */
     /*     cerr << i << ' '; */
     /* cerr << endl; */
-    /* int n = sizeof arr / sizeof *arr; */
+    int n = sizeof arr / sizeof *arr;
     build(1,0,n-1,arr);
     int q,f,s,val,mode;
     sc(q);

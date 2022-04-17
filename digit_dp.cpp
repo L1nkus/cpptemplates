@@ -55,7 +55,7 @@ ll qu(string n){
     for(int i = 0; i < len; ++i){
         for(int t = 0; t < 2; ++t){ //t == 1 -> brak limitu
             for(int s = 0; s < 155; ++s){
-                // if(!dp[i][s][t]) continue might speed it up a lot
+                // if(!dp[i][s][t]) continue might speed it up 2x
                 for(int d = 0; d < 10; ++d){
                     if(!t && n[i] < d) break;
                     int nt = (t | (d < n[i]));
@@ -75,7 +75,6 @@ ll qu(string n){
 
 ll dppre[21][155];
 
-// constexpr można ez
 void pre(){
     // Traktując pos == 0 jako końcowy state -> jaki ma wkład w odpowiedź
     // Jeśli tylko 1 dobry state, to tylko jedno = 1 na początku

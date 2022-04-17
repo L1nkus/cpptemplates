@@ -134,7 +134,7 @@ int main(){
             ++itt;
         }
         int nn = itt;
-        FORE(i,0,nn){ // all edges inside a connected component
+        FORE(i,0,nn){
             whatis(comp[i])
         }
     }

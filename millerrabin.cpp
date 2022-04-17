@@ -41,8 +41,7 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 #define N 1000001
 
-// if needed, replace operator with this
-// __int128 better though
+//if needed, replace operator with this
 inline uint64_t mulmod(uint64_t a, uint64_t b, uint64_t mod){
     if(b == 1) return a;
     if(b&1){
@@ -56,21 +55,18 @@ inline uint64_t fastpow(uint64_t a, uint64_t b, uint64_t mod){
         return a;
     if(b&1){
         return (a * fastpow(a,b^1,mod)) % mod;
-        /* return (__uint128_t(a) * fastpow(a,b^1,mod)) % mod; */
     }
-    // XD don't comment out the line below
     a = fastpow(a,b >> 1,mod);
     return (a*a)%mod;
-    /* return ((__uint128_t)a*a)%mod; */
 }
 
-// Miller-Rabin
+//Miller-Rabin
 inline bool isprime(ull n){
     if(n == 1) return 0;
     if(n == 2) return 1;
     if(n%2 == 0) return 0;
-    /* ull magic[] = {2,3,5,7}; // enough for <= 1 << 32 */
-    ull magic[] = {2,3,5,7,11,13,17,19,23,29,31,37}; // enough for <= 1 << 64
+    /* ull magic[] = {2,3,5,7}; //enough for <= 1 << 32 */
+    ull magic[] = {2,3,5,7,11,13,17,19,23,29,31,37}; //enough for <= 1 << 64
     ull d = n;
     --d;
     ull r = 0;

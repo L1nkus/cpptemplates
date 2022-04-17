@@ -31,7 +31,6 @@ using namespace __gnu_pbds;
 #endif
 template<class L, class R> ostream& operator<<(ostream &os, map<L, R> P) { for(auto const &vv: P)os<<"("<<vv.first<<","<<vv.second<<")"; return os; }
 template<class T> ostream& operator<<(ostream &os, set<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
-template<class T> ostream& operator<<(ostream &os, multiset<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class T> ostream& operator<<(ostream &os, vector<T> V) { os<<"[";for(auto const &vv:V)os<<vv<<","; os<<"]"; return os; }
 template<class L, class R> ostream& operator<<(ostream &os, pair<L, R> P) { os<<"("<<P.first<<","<<P.second<<")"; return os; }
 inline int fstoi(const string &str){auto it=str.begin();bool neg=0;int num=0;if(*it=='-')neg=1;else num=*it-'0';++it;while(it<str.end()) num=num*10+(*it++-'0');if(neg)num*=-1;return num;}
@@ -59,7 +58,6 @@ struct Line{
         return x*m+b < x*nx->m+nx->b;
     }
 };
-ostream& operator<<(ostream &os, Line L) { os<<"("<<L.m<<","<<L.b<<")"; return os; }
 
 //inherituje od multisetu, to istotne!
 //multiset nie set (idk czemu, ale tak ma być)
@@ -98,11 +96,6 @@ struct hull : public multiset<Line>{
         auto l = *lower_bound((Line){x,is_qu});
         return l.m*x+l.b;
     }
-    void reset_succ(){
-        for(auto y = begin(); y != end(); ++y){
-            y->succ = [=]{return next(y) == end() ? 0 : &*next(y);}; //referencja nie iterator
-        }
-    }
 };
 
 //eval(x) -> Get maximum value of ax+b on all inserted lines
@@ -110,9 +103,5 @@ struct hull : public multiset<Line>{
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
-    hull h;
-    h.insert_line(2,-40);
-    h.insert_line(1,-40);
-    whatis(h)
 }
 

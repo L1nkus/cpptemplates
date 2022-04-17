@@ -132,8 +132,7 @@ struct Flow{
         return ret;
     }
 };
-// 9:50 keyboard old
-//7:00 toshiba new
+// 9:50
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);

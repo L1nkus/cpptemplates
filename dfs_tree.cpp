@@ -50,7 +50,6 @@ vi back[N];
 
 bool vis[N];
 int h[N], dp[N];
-int bckh[N];
 
 void d1(int v, int p){
     vis[v] = 1;
@@ -64,18 +63,12 @@ void d1(int v, int p){
             // XDDDD ??????
             /* dp[i] += dp[v]; */
             dp[v] += dp[i];
-            bckh[v] = min(bckh[v], bckh[i]);
-            /* if(bckh[i] > h[v]){ */
-            /*     whatis("bridge") */
-            /* } */
         }
         else{
             // tylko tutaj cnie
             // albo z dolnego w gore lepiej
-            if(h[v] > h[i]){
+            if(h[v] > h[i])
                 back[v].pb(i);
-                bckh[v] = min(bckh[v], h[i]);
-            }
         }
     }
 }

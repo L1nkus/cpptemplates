@@ -41,53 +41,50 @@ template<typename T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag
 template<typename T> using ordered_map = tree<T, int, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 #define N 10000
-struct segtree{
-    int t[N << 2];
+int t[N << 2]; //4N
 
-    void build(int v, int l, int r, int arr[]){
-        if(l == r){
-            t[v] = arr[l];
-        }
-        else{
-            int mid = (l+r) >> 1;
-            build(v << 1,l,mid,arr);
-            build(v << 1 | 1,mid+1,r,arr);
-            t[v] = max(t[v << 1] , t[v << 1 | 1]);
-        }
+void build(int v, int l, int r, int arr[]){
+    if(l == r){
+        t[v] = arr[l];
     }
+    else{
+        int mid = (l+r) >> 1;
+        build(v << 1,l,mid,arr);
+        build(v << 1 | 1,mid+1,r,arr);
+        t[v] = max(t[v << 1] , t[v << 1 | 1]);
+    }
+}
 
-    int query(int v, int tl, int tr, int l, int r){
-        if(l > r){
-            return -0x7f7f7f7f; //the value that changes nothing (0 for sum)
-        }
-        if(l == tl && r == tr){
-            return t[v];
-        }
-        int tm = (tl+tr)/2;
-        return max(query(v*2,tl,tm,l,min(tm,r)),
-        query(v*2+1,tm+1,tr,max(l,tm+1),r));
+int query(int v, int tl, int tr, int l, int r){
+    if(l > r){
+        return -0x7f7f7f7f; //the value that changes nothing (0 for sum)
     }
+    if(l == tl && r == tr){
+        return t[v];
+    }
+    int tm = (tl+tr)/2;
+    return max(query(v*2,tl,tm,l,min(tm,r)),
+    query(v*2+1,tm+1,tr,max(l,tm+1),r));
+}
 
-    void modify(int v, int tl, int tr, int pos, int val){
-        if(tl == tr){
-            t[v] = val;
-            return;
-        }
-        int tm = (tl+tr)/2;
-        if(pos <= tm)
-            modify(v*2,tl,tm,pos,val);
-        else
-            modify(v*2|1,tm+1,tr,pos,val);
-        t[v] = max(t[v<<1],t[v<<1|1]);
+void modify(int v, int tl, int tr, int pos, int val){
+    if(tl == tr){
+        t[v] = val;
+        return;
     }
-};
+    int tm = (tl+tr)/2;
+    if(pos <= tm)
+        modify(v*2,tl,tm,pos,val);
+    else
+        modify(v*2|1,tm+1,tr,pos,val);
+    t[v] = max(t[v<<1],t[v<<1|1]);
+}
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(0);
     int arr[] = {5,-1,32,-6,31,42,3,41,0,-4,44,8};
     int n = sizeof arr / sizeof arr[0];
-    segtree t;
-    t.build(1,0,n-1,arr);
+    build(1,0,n-1,arr);
     FORR(i,arr)
         cout << i << ' ';
     cout << endl;
@@ -96,10 +93,10 @@ int main(){
     while(q--){
         sc(mode,f,s);
         if(mode == 1){ //query
-            cout << t.query(1,0,n-1,f,s) << endl;
+            cout << query(1,0,n-1,f,s) << endl;
         }
         else{
-            t.modify(1,0,n-1,f,s);
+            modify(1,0,n-1,f,s);
         }
     }
 }

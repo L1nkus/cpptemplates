@@ -34,7 +34,6 @@ import ycm_core
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
 # CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
-# does this even work?
 flags = [
 '-Wall',
 '-Wextra',
@@ -45,31 +44,11 @@ flags = [
 '-Wno-error=unused-variable',
 '-fexceptions',
 '-DNDEBUG',
-# '-std=c++14',
-'-std=c++17',
+'-std=c++14',
 '-x',
 'c++',
 '-isystem',
 '../BoostParts',
-]
-
-flagscuda = [
-'-Wall',
-'-Wextra',
-'-Werror',
-'-Wno-long-long',
-'-Woverflow',
-'-Wno-variadic-macros',
-'-Wno-error=unused-variable',
-'-fexceptions',
-'-DNDEBUG',
-# '-std=c++14',
-'-std=c++17',
-'-x',
-'cuda',
-# '-arch=compute_35',
-# '-isystem',
-# '../BoostParts',
 ]
 
 
@@ -91,7 +70,6 @@ else:
   database = None
 
 SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', '.m', '.mm' ]
-# SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', '.m', '.mm', '.cu' ]
 
 def DirectoryOfThisScript():
   return os.path.dirname( os.path.abspath( __file__ ) )
@@ -150,16 +128,6 @@ def GetCompilationInfoForFile( filename ):
 
 
 def FlagsForFile( filename, **kwargs ):
-  # 1604
-  # if filename.endswith('.cu'):
-  #   compile_flags = flagscuda
-  #   # compile_flags = cuda_flags
-  #   # compile_flags.extend(common)
-  #   # compile_flags.extend(includes)
-  #   return {
-  #       'flags': compile_flags,
-  #       'do_cache': True
-  #   }
   if database:
     # Bear in mind that compilation_info.compiler_flags_ does NOT return a
     # python list, but a "list-like" StringVec object
