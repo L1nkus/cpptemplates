@@ -70,11 +70,19 @@ int main(){
         /* GET(a) */
         tcs.push_back({n,-1});
     }
-    std::thread ths[t];
-    REP(i,t)
-        ths[i] = std::thread(solve, i);
-    REP(i,t)
-        ths[i].join();
+    int phases = 4; // Because can't start 1000 threads on students.
+    int l = 0;
+    REP(ph,phases){
+        int rinc = t / phases + 1;
+        std::thread ths[t];
+        FOR(i,l,min(t,l+rinc)-1){
+            debug(i);
+            ths[i] = std::thread(solve, i);
+        }
+        FOR(i,l,min(t,l+rinc)-1)
+            ths[i].join();
+        l += rinc;
+    }
     /* REP(i,t) */
     /*     solve(i); */
     // n = 100, 1e3:
