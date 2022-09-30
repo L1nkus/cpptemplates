@@ -121,6 +121,8 @@ void pre(){
 }
 
 ll binom(ll n, ll k){
+    if(n < k || n < 0)
+        return 0;
     return fac[n] * facinv[k] % mod * facinv[n - k] % mod;
 }
 
